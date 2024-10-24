@@ -80,8 +80,8 @@ def sync(telraam_api):
 	telraam_instanceIDs = [instance['instance_id'] for instance in telraam_instances_berlin]
 
 	print(f"sync -> start synchronization now")
-	print(f"sync -> found {len(telraam_segments_berlin)} segments, {len(telraam_instances_berlin)} instances")
-	print(f"sync -> found {len(sensorThings_segmentIDs)} Locations, {len(sensorThings_instanceIDs)} Things")
+	print(f"sync   -> found {len(telraam_segments_berlin)} segments, {len(telraam_instances_berlin)} instances")
+	print(f"sync   -> found {len(sensorThings_segmentIDs)} Locations, {len(sensorThings_instanceIDs)} Things")
 	
 	"""
 	Delete entities from sensorThings if not present in the Telraam data anymore
