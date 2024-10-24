@@ -1,7 +1,7 @@
 {
 	"sensorThings_base_location": "http://localhost:8080/FROST-Server/v1.1",
 	"telraam_base_location": "https://telraam-api.net/v1",
-	"sync_timer_in_seconds": 1200,
+	"sync_timer_in_seconds": 3600,
 	"telraam_key_header": {
 		"X-Api-Key": "yivGlap2xB5scqBXDB3AJ8NTGcemuTOb2KkZMHNI",
 		"Content-Type": "application/json"

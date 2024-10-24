@@ -7,11 +7,11 @@ class TelraamAPI:
 		self.api_key_header = api_key_header
 		self.base_url = base_url
 
-	def get_traffic_snapshot(self, area):
+	def get_traffic_snapshot(self, area, contents, time_in_ut):
 		url = f"{self.base_url}/reports/traffic_snapshot"
 		body = {
-				"time":"live",
-				"contents":"minimal",
+				"time":time_in_ut,
+				"contents": contents,
 				"area":area
 		}	
 		return self.telraam_post(url, body)
