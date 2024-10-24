@@ -4,6 +4,7 @@ import time
 from sync import sync
 from TelraamAPI import TelraamAPI
 from sensorThings_entities.Sensor import Sensor
+from sensorThings_entities.ObservedProperty import ObservedProperty
 
 with open("config/config.json", mode="r", encoding="utf-8") as read_file:
 	CONFIG = json.load(read_file)
@@ -32,12 +33,15 @@ if __name__ == "__main__":
 
 	sensorThings_base_location = CONFIG["sensorThings_base_location"]
 
-	# Get Sensors
+	# Get and/or add Sensors
 	telraam_s2 = Sensor(sensorThings_base_location, ENTITIES["Sensors"]["Telraam_S2"])
 	telraam_v1 = Sensor(sensorThings_base_location, ENTITIES["Sensors"]["Telraam_V1"])
 	sensors = {"Telraam_S2": telraam_s2, "Telraam_V1": telraam_v1}
 
-	# TODO: Check for observedPropertiy
+	# Get and/or add ObservedProperties
+	observed_properties = {}
+	for observed_property in ENTITIES["ObservedProperties"].values():
+		observed_properties[observed_property["name"]] = ObservedProperty(sensorThings_base_location, observed_property)
 
 	telraam_api = TelraamAPI(CONFIG["telraam_key_header"], CONFIG["telraam_base_location"])
 
