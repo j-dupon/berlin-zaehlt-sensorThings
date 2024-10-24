@@ -1,14 +1,26 @@
 import json
 import requests
 
+with open("config/config.json", mode="r", encoding="utf-8") as read_file:
+  CONFIG = json.load(read_file)
+
 class Location:
-  def __init__(self, segment_id, geometry):
+  def __init__(self, segment_id, **kwargs):
     self.name = "Segment"
     self.description = "Road segment of the Telraam Instance"
     self.segment_id = segment_id
     self.encodingType = "application/geo+json"
-    self.location = geometry
-    self.Things = []
+
+    if "things" in kwargs.keys():
+      self.Things = kwargs["things"]
+      self.location = kwargs["location"]   
+      self.iot_id = self.get_iot_id()
+    else:
+      self.iot_id = self.get_iot_id()
+      location = requests.get(f"{CONFIG['sensorThings_base_location']}/Locations({self.iot_id})?$select=location&$expand=Things($select=@iot.id)")
+      self.Things = location.json()["Things"]
+      self.location = location.json()["location"]
+
 
   def link_to_things(self, iotIDs):
     self.Things += [iot_id for iot_id in iotIDs]
@@ -27,44 +39,31 @@ class Location:
     }
     return json.dumps(import_json)
 
-  def import_self(self, sensorThings_base_url):
-    exists_iot_id = self.get_iot_id(sensorThings_base_url)
-    if exists_iot_id["ok"]:
-      print(f"ERROR -> Location@segment_id({self.segment_id}): Location with segment_id already exists!")
-      return None
-
-    import_result = requests.post(f"{sensorThings_base_url}/Locations", data = self.get_import_json())
-    
-    if import_result.ok:
-      location = requests.get(import_result.headers["Location"])
-      print(f"Location@iot.id({location.json()['@iot.id']}) -> success - imported new Location({self.segment_id}) for Thing(s)({self.Things}), Location: {location.json()}")
-      return location.json()["@iot.id"]
-    else:
-      print(f"ERROR -> Location@segment_id({self.segment_id}): {import_result.headers}")
-      return None
-
-  def update_self(self, sensorThings_base_url):
-    exists_iot_id = self.get_iot_id(sensorThings_base_url)
-    if not exists_iot_id["ok"]:
-      print(f"ERROR -> Location@segment_id({self.segment_id}): error finding unique iot_id - {exists_iot_id['result']}")
-      return None
-
-    iot_id = exists_iot_id["result"]
-    update_result = requests.patch(f"{sensorThings_base_url}/Locations({iot_id})", data = self.get_import_json())
+  def update_self(self):
+    iot_id = self.get_iot_id()
+    update_result = requests.patch(f"{CONFIG['sensorThings_base_location']}/Locations({iot_id})", data = self.get_import_json())
 
     if update_result.ok:
-      location = requests.get(f"{sensorThings_base_url}/Locations({iot_id})")
+      location = requests.get(f"{CONFIG['sensorThings_base_location']}/Locations({iot_id})")
       print(f"Location@iot.id({iot_id}) -> success - updated Location({self.segment_id}) for Thing(s)({self.Things}), Location: {location.json()}")
       return iot_id
     else:
       print(f"ERROR -> Location@iot.id({iot_id}): {update_result.json()}")
       return None
 
-
-  def get_iot_id(self, sensorThings_base_url):
-    location_query_url = f"{sensorThings_base_url}/Locations?$filter=properties/segment_id eq {self.segment_id}"
-    res = requests.get(location_query_url)
-    if len(res.json()["value"]) == 1:
-      return {"ok": 1, "result": res.json()["value"][0]["@iot.id"]}
+  def import_self(self):
+    import_result = requests.post(f"{CONFIG['sensorThings_base_location']}/Locations", data = self.get_import_json())
+    if import_result.ok:
+      location = requests.get(import_result.headers["Location"])
+      print(f"Location@iot.id({location.json()['@iot.id']}) -> imported new Location: {location.json()}")
+      return location.json()["@iot.id"]
     else:
-      return {"ok": 0 , "result": res.json()}
+      print(f"ERROR -> Location({self.segment_id}): {import_result.headers}")
+      return None
+
+  def get_iot_id(self):
+    locations = requests.get(f"{CONFIG['sensorThings_base_location']}/Locations?$filter=properties/segment_id eq '{self.segment_id}'&$select=@iot.id")
+    if len(locations.json()["value"]) == 1:
+      return locations.json()["value"][0]["@iot.id"]
+    else:
+      return self.import_self()

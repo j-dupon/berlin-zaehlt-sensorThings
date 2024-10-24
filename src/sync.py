@@ -110,21 +110,17 @@ def sync(telraam_api):
 				print(f"\nsync@instance_id({instance_id}) -> found new instance({instance_id}) with segment_id({segment_id}))")
 				thing = Thing(instance['user_id'], instance_id, segment_id)
 				iot_id = thing.import_self(CONFIG['sensorThings_base_location'])
-				sensorThings_instanceIDs.append(instance_id)
-				location = Location(segment_id, telraam_segments_berlin[segment_id]['geometry'])
-				location.link_to_things([{"@iot.id": iot_id}])
-
+				
 				# Import new segment as location
 				if segment_id not in sensorThings_segmentIDs:
-					location.import_self(CONFIG['sensorThings_base_location'])
+					location = Location(segment_id, location = telraam_segments_berlin[segment_id]['geometry'], things = [{"@iot.id": iot_id}])
 					sensorThings_segmentIDs.append(segment_id)
-
+					
 				# Link existing location to new thing
 				else:
-					iotIDs_filter_url = f"{CONFIG['sensorThings_base_location']}/Things?$filter=properties/segment_id eq {segment_id}&$select=@iot.id"
-					iotIDs_query_result = requests.get(iotIDs_filter_url)
-					location.link_to_things(iotIDs_query_result.json()['value'])
-					location.update_self(CONFIG['sensorThings_base_location'])
+					location = Location(segment_id, location = telraam_segments_berlin[segment_id]['geometry'])
+					location.link_to_things([{"@iot.id": iot_id}])
+					location.update_self()
 
 		except RuntimeError as err:
 			print(f"ERROR -> sync@segment_id({segment_id}): {err}")

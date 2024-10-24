@@ -34,9 +34,9 @@ if __name__ == "__main__":
 	sensorThings_base_location = CONFIG["sensorThings_base_location"]
 
 	# Get and/or add Sensors
-	telraam_s2 = Sensor(sensorThings_base_location, ENTITIES["Sensors"]["Telraam_S2"])
-	telraam_v1 = Sensor(sensorThings_base_location, ENTITIES["Sensors"]["Telraam_V1"])
-	sensors = {"Telraam_S2": telraam_s2, "Telraam_V1": telraam_v1}
+	sensors = {}
+	for sensor in ENTITIES["Sensors"].values():
+		sensors[sensor["name"]] = Sensor(sensorThings_base_location, sensor)
 
 	# Get and/or add ObservedProperties
 	observed_properties = {}
