@@ -13,6 +13,13 @@
 			"properties": {},
 			"encodingType": "text",
 			"metadata": "https://telraam.net/en/v1"
+		},
+		"Unknown": {
+			"name": "unknown",
+			"description": "This field has not been filled out",
+			"properties": {},
+			"encodingType": "text",
+			"metadata": "https://telraam.net/en/v1"
 		}
 	},
 
@@ -31,13 +38,13 @@
 		},
 		"bike": { 
 			"name": "bike",
-			"description": "the number of two-wheelers (mainly cyclists and motorbikes)",
+			"description": "The number of two-wheelers (mainly cyclists and motorbikes)",
 			"properties": {},
 			"definition": "https://documenter.getpostman.com/view/8210376/TWDRqyaV#864d7e84-7c19-4591-b990-06dc8a1b191b"
 		},
 		"pedestrian": { 
 			"name": "pedestrian",
-			"description": "the number of pedestrians",
+			"description": "The number of pedestrians",
 			"properties": {},
 			"definition": "https://documenter.getpostman.com/view/8210376/TWDRqyaV#864d7e84-7c19-4591-b990-06dc8a1b191b"
 		},

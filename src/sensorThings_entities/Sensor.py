@@ -1,14 +1,17 @@
 import requests
 import json
 
+with open("config/config.json", mode="r", encoding="utf-8") as read_file:
+  CONFIG = json.load(read_file)
+
 class Sensor:
-	def __init__(self, sensorThings_base_url, sensor):
+	def __init__(self, sensor):
 		self.name = sensor["name"]
 		self.description = sensor["description"]
 		self.properties = sensor["properties"]
 		self.encodingType = sensor["encodingType"]
 		self.metadata = sensor["metadata"]
-		self.iot_id = self.get_iot_id(sensorThings_base_url)
+		self.iot_id = self.get_iot_id()
 
 	def get_import_json(self):
 		import_json = {
@@ -20,8 +23,8 @@ class Sensor:
 		}
 		return json.dumps(import_json)
 
-	def import_self(self, sensorThings_base_url):
-		import_result = requests.post(f"{sensorThings_base_url}/Sensors", data = self.get_import_json())
+	def import_self(self):
+		import_result = requests.post(f"{CONFIG["sensorThings_base_location"]}/Sensors", data = self.get_import_json())
 		if import_result.ok:
 			sensor = requests.get(import_result.headers["Location"])
 			print(f"Sensor@iot.id({sensor.json()['@iot.id']}) -> imported new Sensor: {sensor.json()}")
@@ -30,9 +33,9 @@ class Sensor:
 			print(f"ERROR -> Sensor({self.name}): {import_result.headers}")
 			return None
 
-	def get_iot_id(self, sensorThings_base_url):
-		sensors = requests.get(f"{sensorThings_base_url}/Sensors?$filter=name eq '{self.name}'&$select=@iot.id")
+	def get_iot_id(self):
+		sensors = requests.get(f"{CONFIG["sensorThings_base_location"]}/Sensors?$filter=name eq '{self.name}'&$select=@iot.id")
 		if len(sensors.json()["value"]) == 1:
 			return sensors.json()["value"][0]["@iot.id"]
 		else:
-			return self.import_self(sensorThings_base_url)
+			return self.import_self()

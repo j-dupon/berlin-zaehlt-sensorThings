@@ -9,5 +9,10 @@
 	"telraam_key_header_2": {
 		"X-Api-Key": "dqjoL0N6rCCQNAVuJqGi5hiIKWGYiNT1fZWWd7C8",
 		"Content-Type": "application/json"
+	},
+	"telraam_traffic_snapshot": {
+		"time": "live",
+		"contents": "minimal",
+		"berlin_area":"13.398872, 52.511014, 1.5"
 	}
 }

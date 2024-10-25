@@ -31,20 +31,18 @@ if __name__ == "__main__":
 	print("Initiate SensorThings API synchronization with Telraam")
 	print("#######################################################\n")
 
-	sensorThings_base_location = CONFIG["sensorThings_base_location"]
-
 	# Get and/or add Sensors
 	sensors = {}
-	for sensor in ENTITIES["Sensors"].values():
-		sensors[sensor["name"]] = Sensor(sensorThings_base_location, sensor)
+	for sensor in ENTITIES["Sensors"]:
+		sensors[sensor] = Sensor(ENTITIES["Sensors"][sensor])
 
 	# Get and/or add ObservedProperties
 	observed_properties = {}
 	for observed_property in ENTITIES["ObservedProperties"].values():
-		observed_properties[observed_property["name"]] = ObservedProperty(sensorThings_base_location, observed_property)
+		observed_properties[observed_property["name"]] = ObservedProperty(observed_property)
 
 	telraam_api = TelraamAPI(CONFIG["telraam_key_header"], CONFIG["telraam_base_location"])
 
 	while True:
-		sync(telraam_api)
+		sync(telraam_api, sensors, observed_properties)
 		time.sleep(CONFIG["sync_timer_in_seconds"])

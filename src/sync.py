@@ -3,6 +3,7 @@ import json
 import time
 from sensorThings_entities.Location import Location 
 from sensorThings_entities.Thing import Thing 
+from sensorThings_entities.Datastream import Datastream 
 
 with open("config/config.json", mode="r", encoding="utf-8") as read_file:
 	CONFIG = json.load(read_file)
@@ -41,7 +42,9 @@ def delete_outdated_entities(entity, telraamIDs, sensorThingsIDs):
 		else:
 			print(f"ERROR -> sync: found {result_iot_id_query.json()['value']} for {entity_id} of {entity}")
 
-def sync(telraam_api):
+
+
+def sync(telraam_api, sensors, observed_properties):
 
 	"""
 	Get ID-lists for Things and Locations from the sensorThings API
@@ -55,7 +58,7 @@ def sync(telraam_api):
 	"""
 
 	# Get a list of Telraam segments in Berlin
-	telraam_snapshots = telraam_api.get_traffic_snapshot('13.398872, 52.511014, 30', 'minimal', 'live')
+	telraam_snapshots = telraam_api.get_traffic_snapshot(CONFIG["telraam_traffic_snapshot"])
 	if not telraam_snapshots['ok']:
 		print(f"ERROR -> sync: {telraam_snapshots['error_message']}")
 		print("sync -> stop")
@@ -96,18 +99,30 @@ def sync(telraam_api):
 
 	new_instances = [instance for instance in telraam_instances_berlin if instance['instance_id'] not in sensorThings_instanceIDs]
 	if new_instances == []:
-		print("sync -> no new instances - stop")
+		print("sync   -> STOP: no new instances")
 		return 0
 
 	# Filter instances for Berlin segments
-	for instance in telraam_instances_berlin:
+	for instance in new_instances:
 		try:
 			instance_id = instance['instance_id']
 			segment_id = instance['segment_id']
 
+			print(f"\n### Start synchronization for instance({instance_id}) ###")
+
 			if not instance_id in sensorThings_instanceIDs:	
 				print(f"\nsync@instance_id({instance_id}) -> found new instance({instance_id}) with segment_id({segment_id}))")
 				thing = Thing(instance_id, segment_id = segment_id, user_id = instance["user_id"])
+
+				if instance["hardware_version"] == 1:
+					sensor = sensors["Telraam_V1"]
+				elif instance["hardware_version"] == 2:
+					sensor = sensors["Telraam_S2"]
+				else:
+					sensor = sensors["Unknown"]
+
+				for observed_property in observed_properties.values():
+					datastream = Datastream(observed_property, sensor, thing)
 				
 				# Import new segment as location
 				if segment_id not in sensorThings_segmentIDs:
@@ -125,4 +140,5 @@ def sync(telraam_api):
 			print("sync -> exit")
 			exit()
 
-	print("sync   -> done")
+	print(f"\nsync -> imported {len(new_instances)} new instances")
+	print("sync -> done")
