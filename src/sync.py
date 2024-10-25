@@ -44,7 +44,7 @@ def delete_outdated_entities(entity, telraamIDs, sensorThingsIDs):
 def sync(telraam_api):
 
 	"""
-	Get ID-lists for Things and Locations from sensorThings
+	Get ID-lists for Things and Locations from the sensorThings API
 	"""
 
 	sensorThings_segmentIDs = get_sensorThings_entitiy_IDs("Locations", "segment_id") 
@@ -91,7 +91,7 @@ def sync(telraam_api):
 	delete_outdated_entities("Things", telraam_instanceIDs, sensorThings_instanceIDs)
 
 	"""
-	Import new instances and segments from Telraam as things and locations in sensorThings
+	Import new instances and segments from Telraam as things and locations in the sensorThings API
 	"""
 
 	new_instances = [instance for instance in telraam_instances_berlin if instance['instance_id'] not in sensorThings_instanceIDs]
@@ -100,7 +100,6 @@ def sync(telraam_api):
 		return 0
 
 	# Filter instances for Berlin segments
-	telraam_berlin_instances = {}
 	for instance in telraam_instances_berlin:
 		try:
 			instance_id = instance['instance_id']
@@ -108,18 +107,17 @@ def sync(telraam_api):
 
 			if not instance_id in sensorThings_instanceIDs:	
 				print(f"\nsync@instance_id({instance_id}) -> found new instance({instance_id}) with segment_id({segment_id}))")
-				thing = Thing(instance['user_id'], instance_id, segment_id)
-				iot_id = thing.import_self(CONFIG['sensorThings_base_location'])
+				thing = Thing(instance_id, segment_id = segment_id, user_id = instance["user_id"])
 				
 				# Import new segment as location
 				if segment_id not in sensorThings_segmentIDs:
-					location = Location(segment_id, location = telraam_segments_berlin[segment_id]['geometry'], things = [{"@iot.id": iot_id}])
+					location = Location(segment_id, location = telraam_segments_berlin[segment_id]['geometry'], things = [{"@iot.id": thing.iot_id}])
 					sensorThings_segmentIDs.append(segment_id)
 					
 				# Link existing location to new thing
 				else:
-					location = Location(segment_id, location = telraam_segments_berlin[segment_id]['geometry'])
-					location.link_to_things([{"@iot.id": iot_id}])
+					location = Location(segment_id)
+					location.link_to_things([{"@iot.id": thing.iot_id}])
 					location.update_self()
 
 		except RuntimeError as err:
@@ -127,4 +125,4 @@ def sync(telraam_api):
 			print("sync -> exit")
 			exit()
 
-	print("sync -> done")
+	print("sync   -> done")

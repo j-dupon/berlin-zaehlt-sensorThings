@@ -11,7 +11,7 @@ class Location:
     self.segment_id = segment_id
     self.encodingType = "application/geo+json"
 
-    if "things" in kwargs.keys():
+    if "things" in kwargs.keys() and "location" in kwargs.keys():
       self.Things = kwargs["things"]
       self.location = kwargs["location"]   
       self.iot_id = self.get_iot_id()
