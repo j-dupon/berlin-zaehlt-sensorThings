@@ -10,7 +10,7 @@ class Datastream:
 		self.description = observed_property.description
 		self.observationType = observed_property.definition
 		self.unitOfMeasurement = {
-	    "name": f"count of {observed_property.name}",
+	    "name": observed_property.name,
 	    "symbol": "",
 	    "definition": self.description
 	  }
@@ -33,7 +33,7 @@ class Datastream:
 		return json.dumps(import_json)
 
 	def import_self(self):
-		import_result = requests.post(f"{CONFIG["sensorThings_base_location"]}/Datastreams", data = self.get_import_json())
+		import_result = requests.post(f"{CONFIG['sensorThings_base_location']}/Datastreams", data = self.get_import_json())
 		if import_result.ok:
 			datastream = requests.get(import_result.headers["Location"])
 			print(f"Datastream@iot.id({datastream.json()['@iot.id']}) -> imported new Datastream: {datastream.json()}")
@@ -43,7 +43,7 @@ class Datastream:
 			return None
 
 	def get_iot_id(self):
-		datastreams = requests.get(f"{CONFIG["sensorThings_base_location"]}/Things({self.Thing["@iot.id"]})?$expand=Datastreams($filter=name eq '{self.name}';$select=@iot.id)")
+		datastreams = requests.get(f"{CONFIG['sensorThings_base_location']}/Things({self.Thing['@iot.id']})?$expand=Datastreams($filter=name eq '{self.name}';$select=@iot.id)")
 		if len(datastreams.json()["Datastreams"]) == 1:
 			return datastreams.json()["value"][0]["@iot.id"]
 		else:

@@ -23,7 +23,14 @@ class TelraamAPI:
 		url = f"{self.base_url}/cameras/segment/{segment_id}"
 		return self.telraam_get(url)
 
-	def get_traffic(self, body):
+	def get_traffic(self, settings):
+		body = {
+		  "level": settings["level"],
+		  "format": settings["format"],
+		  "id": settings["id"],
+		  "time_start": settings["time_start"],
+		  "time_end": settings["time_end"]
+		}	
 		return self.telraam_post(f"{self.base_url}/reports/traffic", body)
 
 	def get_segments(self):

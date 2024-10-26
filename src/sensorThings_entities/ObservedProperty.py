@@ -22,7 +22,7 @@ class ObservedProperty:
 		return json.dumps(import_json)
 
 	def import_self(self):
-		import_result = requests.post(f"{CONFIG["sensorThings_base_location"]}/ObservedProperties", data = self.get_import_json())
+		import_result = requests.post(f"{CONFIG['sensorThings_base_location']}/ObservedProperties", data = self.get_import_json())
 		if import_result.ok:
 			observed_property = requests.get(import_result.headers["Location"])
 			print(f"ObservedProperty@iot.id({observed_property.json()['@iot.id']}) -> imported new ObservedProperty: {observed_property.json()}")
@@ -32,7 +32,7 @@ class ObservedProperty:
 			return None
 
 	def get_iot_id(self):
-		observed_properties = requests.get(f"{CONFIG["sensorThings_base_location"]}/ObservedProperties?$filter=name eq '{self.name}'&$select=@iot.id")
+		observed_properties = requests.get(f"{CONFIG['sensorThings_base_location']}/ObservedProperties?$filter=name eq '{self.name}'&$select=@iot.id")
 		if len(observed_properties.json()["value"]) == 1:
 			return observed_properties.json()["value"][0]["@iot.id"]
 		else:

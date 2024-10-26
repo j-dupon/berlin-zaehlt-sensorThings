@@ -11,14 +11,14 @@ class Thing:
     self.description = "Telraam device for counting traffic on a street segment"
     self.instance_id = instance_id
 
-    if "user_id" in kwargs.keys() and "segment_id" in kwargs.keys():
-      self.user_id = kwargs["user_id"]
+    if "segment_id" in kwargs.keys(): # and "user_id" in kwargs.keys() 
+      #self.user_id = kwargs["user_id"]
       self.segment_id = kwargs["segment_id"]
       self.iot_id = self.get_iot_id()
     else:
       self.iot_id = self.get_iot_id()
       thing = requests.get(f"{CONFIG['sensorThings_base_location']}/Things({self.iot_id})")
-      self.user_id = thing.json()["properties"]["user_id"]
+      #self.user_id = thing.json()["properties"]["user_id"]
       self.segment_id = thing.json()["properties"]["segment_id"]
 
   def get_import_json(self):
@@ -26,7 +26,7 @@ class Thing:
       "name": self.name,
       "description": self.description,
       "properties": {
-        "user_id": self.user_id,
+        #"user_id": self.user_id,
         "segment_id": self.segment_id,
         "instance_id": self.instance_id  # unique
       }

@@ -2,7 +2,6 @@ import requests
 import json
 import time
 from sync import sync
-from TelraamAPI import TelraamAPI
 from sensorThings_entities.Sensor import Sensor
 from sensorThings_entities.ObservedProperty import ObservedProperty
 
@@ -41,8 +40,9 @@ if __name__ == "__main__":
 	for observed_property in ENTITIES["ObservedProperties"].values():
 		observed_properties[observed_property["name"]] = ObservedProperty(observed_property)
 
-	telraam_api = TelraamAPI(CONFIG["telraam_key_header"], CONFIG["telraam_base_location"])
-
 	while True:
-		sync(telraam_api, sensors, observed_properties)
+		if time.localtime().tm_hour > 8 and time.localtime().tm_hour < 20:
+			sync(sensors, observed_properties)
+		else:
+			print("waiting for the sun to rise")
 		time.sleep(CONFIG["sync_timer_in_seconds"])

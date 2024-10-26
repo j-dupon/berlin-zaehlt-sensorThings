@@ -24,7 +24,7 @@ class Sensor:
 		return json.dumps(import_json)
 
 	def import_self(self):
-		import_result = requests.post(f"{CONFIG["sensorThings_base_location"]}/Sensors", data = self.get_import_json())
+		import_result = requests.post(f"{CONFIG['sensorThings_base_location']}/Sensors", data = self.get_import_json())
 		if import_result.ok:
 			sensor = requests.get(import_result.headers["Location"])
 			print(f"Sensor@iot.id({sensor.json()['@iot.id']}) -> imported new Sensor: {sensor.json()}")
@@ -34,7 +34,7 @@ class Sensor:
 			return None
 
 	def get_iot_id(self):
-		sensors = requests.get(f"{CONFIG["sensorThings_base_location"]}/Sensors?$filter=name eq '{self.name}'&$select=@iot.id")
+		sensors = requests.get(f"{CONFIG['sensorThings_base_location']}/Sensors?$filter=name eq '{self.name}'&$select=@iot.id")
 		if len(sensors.json()["value"]) == 1:
 			return sensors.json()["value"][0]["@iot.id"]
 		else:
