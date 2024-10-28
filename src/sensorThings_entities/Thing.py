@@ -11,24 +11,30 @@ class Thing:
     self.description = "Telraam device for counting traffic on a street segment"
     self.instance_id = instance_id
 
-    if "segment_id" in kwargs.keys(): # and "user_id" in kwargs.keys() 
-      #self.user_id = kwargs["user_id"]
+    if kwargs.keys():
       self.segment_id = kwargs["segment_id"]
+      self.status = kwargs["status"]
       self.iot_id = self.get_iot_id()
     else:
       self.iot_id = self.get_iot_id()
       thing = requests.get(f"{CONFIG['sensorThings_base_location']}/Things({self.iot_id})")
-      #self.user_id = thing.json()["properties"]["user_id"]
       self.segment_id = thing.json()["properties"]["segment_id"]
+      self.status = thing.json()["properties"]["status"]
+      self.set_datastreams()
+
+  def set_datastreams(self):
+    datastreams_query_result = requests.get(f"{CONFIG['sensorThings_base_location']}/Things({self.iot_id})/Datastreams?$select=@iot.id,unitOfMeasurement/name")
+    self.datastreams = datastreams_query_result.json()["value"]
+    return self.set_datastreams
 
   def get_import_json(self):
     import_json = {
       "name": self.name,
       "description": self.description,
       "properties": {
-        #"user_id": self.user_id,
         "segment_id": self.segment_id,
-        "instance_id": self.instance_id  # unique
+        "instance_id": self.instance_id,
+        "status": self.status
       }
     }
     return json.dumps(import_json)

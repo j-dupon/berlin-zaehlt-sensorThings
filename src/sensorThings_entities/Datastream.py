@@ -36,7 +36,7 @@ class Datastream:
 		import_result = requests.post(f"{CONFIG['sensorThings_base_location']}/Datastreams", data = self.get_import_json())
 		if import_result.ok:
 			datastream = requests.get(import_result.headers["Location"])
-			print(f"Datastream@iot.id({datastream.json()['@iot.id']}) -> imported new Datastream: {datastream.json()}")
+			#print(f"Datastream@iot.id({datastream.json()['@iot.id']}) -> imported new Datastream: {datastream.json()}")
 			return datastream.json()["@iot.id"]
 		else:
 			print(f"ERROR -> Datastream({self.name}): {import_result.headers}")

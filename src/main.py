@@ -4,6 +4,8 @@ import time
 from sync import sync
 from sensorThings_entities.Sensor import Sensor
 from sensorThings_entities.ObservedProperty import ObservedProperty
+from sensorThings_entities.Thing import Thing
+
 
 with open("config/config.json", mode="r", encoding="utf-8") as read_file:
 	CONFIG = json.load(read_file)
@@ -30,6 +32,13 @@ if __name__ == "__main__":
 	print("Initiate SensorThings API synchronization with Telraam")
 	print("#######################################################\n")
 
+	# Get things
+	things = {}
+	things_query_result = requests.get(f"{CONFIG['sensorThings_base_location']}/Things")
+	for thing in things_query_result.json()["value"]:
+		instance_id = thing["properties"]["instance_id"]
+		things[instance_id] = Thing(instance_id)
+
 	# Get and/or add Sensors
 	sensors = {}
 	for sensor in ENTITIES["Sensors"]:
@@ -42,7 +51,7 @@ if __name__ == "__main__":
 
 	while True:
 		if time.localtime().tm_hour > 8 and time.localtime().tm_hour < 20:
-			sync(sensors, observed_properties)
+			sync(things, sensors, observed_properties)
 		else:
 			print("waiting for the sun to rise")
 		time.sleep(CONFIG["sync_timer_in_seconds"])

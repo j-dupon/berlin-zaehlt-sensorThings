@@ -26,7 +26,7 @@ class Observation:
 		import_result = requests.post(f"{CONFIG['sensorThings_base_location']}/Observations", data = self.get_import_json())
 		if import_result.ok:
 			observation = requests.get(import_result.headers["Location"])
-			print(f"Observation@iot.id({observation.json()['@iot.id']}) -> imported new Observation: {observation.json()}")
+			#print(f"Observation@iot.id({observation.json()['@iot.id']}) -> imported new Observation: {observation.json()}")
 			return observation.json()["@iot.id"]
 		else:
 			print(f"ERROR -> Observation@Datastream({self.Datastream['@iot.id']}): {import_result.headers}")
