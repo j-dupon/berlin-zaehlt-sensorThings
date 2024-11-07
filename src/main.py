@@ -25,7 +25,7 @@ def check_sensorThings_connection():
 if __name__ == "__main__":
 
 	if not check_sensorThings_connection():
-		print("ERROR -> sync: not connected to sensorThingsAPI")
+		print("ERROR -> main: not connected to sensorThingsAPI")
 		exit()
 
 	print("\n#######################################################")
@@ -50,8 +50,11 @@ if __name__ == "__main__":
 		observed_properties[observed_property["name"]] = ObservedProperty(observed_property)
 
 	while True:
-		if time.localtime().tm_hour > 8 and time.localtime().tm_hour < 20:
-			sync(things, sensors, observed_properties)
+		if time.localtime().tm_min == 50:
+			if time.localtime().tm_hour > 7 and time.localtime().tm_hour < 18:
+				sync(things, sensors, observed_properties)
+			else:
+				print("main -> waiting for the sun to rise") 
+			time.sleep(3000)
 		else:
-			print("waiting for the sun to rise")
-		time.sleep(CONFIG["sync_timer_in_seconds"])
+			time.sleep(55)

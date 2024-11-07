@@ -160,8 +160,9 @@ def sync(things, sensors, observed_properties):
 					date = telraam_traffic_data["date"]
 					observation = Observation(result, date, datastream["@iot.id"])
 				else:
-					if len(telraam_traffic_query_result["result"].json()["report"]) == 0:
+					if instance["status"] == "active" and len(telraam_traffic_query_result["result"].json()["report"]) == 0:
 						print(f"ERROR -> sync@instance_id({instance['instance_id']}): empty query result for active instance")
+						break
 					inactive_count += 1/len(things[instance_id].datastreams)
 					observation = Observation(instance["status"], None, datastream["@iot.id"])
 
