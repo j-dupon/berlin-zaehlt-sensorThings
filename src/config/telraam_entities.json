@@ -1,23 +1,25 @@
 {
+	"Things": {
+    	"name": "Telraam instance",
+    	"description": "Telraam device for counting traffic on a street segment"
+	},
+	
 	"Sensors": {
 		"Telraam_S2": {
 			"name": "Telraam S2",
 			"description": "The Telraam S2 device counts, categorises and reports all activity on the street",
-			"properties": {},
 			"encodingType": "text",
 			"metadata": "https://telraam.net/en/S2"
 		},
 		"Telraam_V1": {
 			"name": "Telraam V1",
 			"description": "Telraam V1 uses computer vision (OpenCV) on a Raspberry Pi to detect objects in front of a constant (periodically recalculated median) background.",
-			"properties": {},
 			"encodingType": "text",
 			"metadata": "https://telraam.net/en/v1"
 		},
 		"Unknown": {
 			"name": "unknown",
 			"description": "This field has not been filled out",
-			"properties": {},
 			"encodingType": "text",
 			"metadata": "https://telraam.net/en/v1"
 		}

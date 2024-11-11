@@ -3,7 +3,7 @@ import json
 import time
 from TelraamAPI import TelraamAPI
 from sensorThings_entities.Location import Location 
-from sensorThings_entities.Thing import Thing 
+from sensorThings_entities.Thing_V2 import Thing 
 from sensorThings_entities.Datastream import Datastream 
 from sensorThings_entities.Observation import Observation 
 
@@ -69,12 +69,26 @@ def get_telraam_data(telraam_api):
 	}
 
 def import_new_telraam_instance(instance, things, sensors, observed_properties, sensorThings_segmentIDs, telraam_segments_berlin):
-	instance_id = instance['instance_id']
+	instance_id = instance['instance_id']  
 	segment_id = instance['segment_id']
 
 	print(f"\nsync@instance_id({instance_id}) -> found new instance({instance_id}) with segment_id({segment_id}))")
-	thing = Thing(instance_id, segment_id = segment_id, status = instance["status"])
-	things[instance_id] = thing
+
+	with open("config/telraam_entities.json", mode="r", encoding="utf-8") as read_file:
+		TELRAAM_ENTITIES = json.load(read_file)
+
+	things[instance_id] = Thing(
+		instance_id, 
+		name = TELRAAM_ENTITIES["Things"]["name"],
+		description = TELRAAM_ENTITIES["Things"]["description"],
+		properties = {
+			"instance_id": instance_id,
+			"segment_id": segment_id,
+			"status": instance["status"]
+			}
+		)
+
+	thing = things[instance_id]
 
 	# Select the sensor
 	if instance["hardware_version"] == 1:
@@ -88,7 +102,7 @@ def import_new_telraam_instance(instance, things, sensors, observed_properties, 
 	for observed_property in observed_properties:
 		datastream = Datastream(observed_properties[observed_property], sensor, thing)
 
-	thing.set_datastreams()
+	thing.datastreams()
 	
 	# Import new segment as location
 	if segment_id not in sensorThings_segmentIDs:
@@ -134,6 +148,7 @@ def sync(things, sensors, observed_properties):
 	inactive_count = 0
 	for instance in telraam_instances_berlin:
 		try:
+			instance['instance_id']
 			instance_id = instance['instance_id']
 
 			print(f"### Start synchronization for >>{instance['status']}<< instance({instance_id}) ###")

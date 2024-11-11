@@ -8,7 +8,6 @@ class Sensor:
 	def __init__(self, sensor):
 		self.name = sensor["name"]
 		self.description = sensor["description"]
-		self.properties = sensor["properties"]
 		self.encodingType = sensor["encodingType"]
 		self.metadata = sensor["metadata"]
 		self.iot_id = self.get_iot_id()
@@ -17,7 +16,6 @@ class Sensor:
 		import_json = {
 			"name": self.name,
 			"description": self.description,
-			"properties": self.properties,
 			"encodingType": self.encodingType,
 			"metadata": self.metadata
 		}
