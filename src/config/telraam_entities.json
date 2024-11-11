@@ -3,7 +3,13 @@
     	"name": "Telraam instance",
     	"description": "Telraam device for counting traffic on a street segment"
 	},
-	
+
+	"Locations": {
+		"name": "Segment",
+    	"description": "Road segment of the Telraam Instance",
+    	"encodingType": "application/geo+json"
+	},
+
 	"Sensors": {
 		"Telraam_S2": {
 			"name": "Telraam S2",

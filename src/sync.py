@@ -106,7 +106,15 @@ def import_new_telraam_instance(instance, things, sensors, observed_properties, 
 	
 	# Import new segment as location
 	if segment_id not in sensorThings_segmentIDs:
-		location = Location(segment_id, location = telraam_segments_berlin[segment_id]['geometry'], things = [{"@iot.id": thing.iot_id}])
+		location = Location(
+			segment_id, 
+			name = TELRAAM_ENTITIES["Locations"]["name"],
+			description = TELRAAM_ENTITIES["Locations"]["description"],
+			encodingType = TELRAAM_ENTITIES["Locations"]["encodingType"],
+			location = telraam_segments_berlin[segment_id]['geometry'],  
+			things = [{"@iot.id": thing.iot_id}],
+			properties = {"segment_id": segment_id}
+			)
 		sensorThings_segmentIDs.append(segment_id)
 		
 	# Link existing location to new thing
