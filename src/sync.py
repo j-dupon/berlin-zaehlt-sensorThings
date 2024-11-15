@@ -112,7 +112,7 @@ def import_new_telraam_instance(instance, things, sensors, observed_properties, 
 			description = TELRAAM_ENTITIES["Locations"]["description"],
 			encodingType = TELRAAM_ENTITIES["Locations"]["encodingType"],
 			location = telraam_segments_berlin[segment_id]['geometry'],  
-			things = [{"@iot.id": thing.iot_id}],
+			Things = [{"@iot.id": thing.iot_id()}],
 			properties = {"segment_id": segment_id}
 			)
 		sensorThings_segmentIDs.append(segment_id)
@@ -120,7 +120,7 @@ def import_new_telraam_instance(instance, things, sensors, observed_properties, 
 	# Link existing location to new thing
 	else:
 		location = Location(segment_id)
-		location.link_to_things([{"@iot.id": thing.iot_id}])
+		location.link_to_things([{"@iot.id": thing.iot_id()}])
 		location.update_self()
 
 	return things
@@ -156,13 +156,13 @@ def sync(things, sensors, observed_properties):
 	inactive_count = 0
 	for instance in telraam_instances_berlin:
 		try:
-			instance['instance_id']
+			#instance['instance_id'] += 90000
 			instance_id = instance['instance_id']
 
 			print(f"### Start synchronization for >>{instance['status']}<< instance({instance_id}) ###")
 
 			if not instance_id in sensorThings_instanceIDs:	
-				import_new_telraam_instance(instance, things, sensors, observed_properties, sensorThings_segmentIDs, telraam_segments_berlin)
+				things = import_new_telraam_instance(instance, things, sensors, observed_properties, sensorThings_segmentIDs, telraam_segments_berlin)
 
 			if instance["status"] == "active":
 				time.sleep(2)
@@ -175,9 +175,9 @@ def sync(things, sensors, observed_properties):
 				})
 
 			# Update Observations
-			for datastream in things[instance_id].datastreams:
+			for datastream in things[instance_id].datastreams():
 				if instance["status"] == "active" and len(telraam_traffic_query_result["result"].json()["report"]) > 0:
-					update_count += 1/len(things[instance_id].datastreams)
+					update_count += 1/len(things[instance_id].datastreams())
 					telraam_traffic_data = telraam_traffic_query_result["result"].json()["report"][0]
 					result = telraam_traffic_data[datastream["unitOfMeasurement"]["name"]]
 					date = telraam_traffic_data["date"]
@@ -186,7 +186,7 @@ def sync(things, sensors, observed_properties):
 					if instance["status"] == "active" and len(telraam_traffic_query_result["result"].json()["report"]) == 0:
 						print(f"ERROR -> sync@instance_id({instance['instance_id']}): empty query result for active instance")
 						break
-					inactive_count += 1/len(things[instance_id].datastreams)
+					inactive_count += 1/len(things[instance_id].datastreams())
 					observation = Observation(instance["status"], None, datastream["@iot.id"])
 
 		except RuntimeError as err:

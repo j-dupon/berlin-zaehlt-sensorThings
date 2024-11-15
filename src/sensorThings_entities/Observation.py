@@ -1,17 +1,20 @@
 import requests
 import json
+from .Entity import Entity
 
 with open("config/config.json", mode="r", encoding="utf-8") as read_file:
   CONFIG = json.load(read_file)
 
-class Observation:
+class Observation(Entity):
 	def __init__(self, result, phenomenonTime, datastream):
+		super().__init__(f"Datastream({datastream}):phenomenonTime")
+
 		self.result = result 
 		self.phenomenonTime = phenomenonTime 
 		self.Datastream = {"@iot.id": datastream} 
-		self.iot_id = self.import_self()
+		self.import_self()
 
-	def get_import_json(self):
+	def import_json(self):
 		import_json = {
 		  "result": self.result,
 		  "Datastream": self.Datastream
@@ -22,19 +25,5 @@ class Observation:
 
 		return json.dumps(import_json)
 
-	def import_self(self):
-		import_result = requests.post(f"{CONFIG['sensorThings_base_location']}/Observations", data = self.get_import_json())
-		if import_result.ok:
-			observation = requests.get(import_result.headers["Location"])
-			#print(f"Observation@iot.id({observation.json()['@iot.id']}) -> imported new Observation: {observation.json()}")
-			return observation.json()["@iot.id"]
-		else:
-			print(f"ERROR -> Observation@Datastream({self.Datastream['@iot.id']}): {import_result.headers}")
-			return None
-
-	def get_iot_id(self):
-		observations = requests.get(f"{CONFIG['sensorThings_base_location']}/Datastreams({self.Datastream['@iot.id']})/Observations?$filter=phenomenonTime eq '{self.phenomenonTime}'&$select=@iot.id")
-		if len(observations.json()["value"]) == 1:
-			return observations.json()["value"][0]["@iot.id"]
-		else:
-			return self.import_self()
+	def iot_id():
+		return None

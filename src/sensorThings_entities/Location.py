@@ -8,29 +8,24 @@ with open("config/config.json", mode="r", encoding="utf-8") as read_file:
 class Location(Entity):
   def __init__(self, unique_allocator, **kwargs):
     super().__init__(unique_allocator)
+    self.iot_id_request_url = f"Locations?$filter=properties/unique_allocator eq '{unique_allocator}'&$select=@iot.id"
+
+    if not kwargs.keys():
+      location = requests.get(
+        f"{CONFIG['sensorThings_base_location']}/Locations({self.iot_id()})?$expand=Things($select=@iot.id)"
+        )
+      kwargs = location.json()
+
+    self.name = kwargs["name"]
+    self.description = kwargs["description"]
+    self.encodingType = kwargs["encodingType"]
+    self.Things = kwargs["Things"]
+    self.location = kwargs["location"]   
+    self.properties = kwargs["properties"]
 
     if kwargs.keys():
-      self.name = kwargs["name"]
-      self.description = kwargs["description"]
-      self.encodingType = kwargs["encodingType"]
-      self.Things = kwargs["things"]
-      self.location = kwargs["location"]   
-      self.properties = kwargs["properties"]
       self.properties["unique_allocator"] = unique_allocator
-      self.iot_id = self.iot_id()
-    else:
-      self.iot_id = self.iot_id()
-      location = requests.get(
-        f"{CONFIG['sensorThings_base_location']}/Locations({self.iot_id})?$expand=Things($select=@iot.id)"
-        )
-      location_json = location.json()
-      print("location_json:", location_json)
-      self.name = location_json["name"]
-      self.description = location_json["description"]
-      self.encodingType = location_json["encodingType"]
-      self.Things = location_json["Things"]
-      self.location = location_json["location"]
-      self.properties = location_json["properties"]
+      self.iot_id()
 
   def link_to_things(self, iotIDs):
     self.Things += [iot_id for iot_id in iotIDs]

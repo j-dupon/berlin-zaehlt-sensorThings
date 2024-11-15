@@ -16,13 +16,11 @@ class Entity():
       print(f"{entity_name}@iot.id({entity.json()['@iot.id']}) -> imported new {entity_name}: {entity.json()}")
       return entity.json()["@iot.id"]
     else:
-      print(f"ERROR -> {entity_name}s({self.unique_allocator}): {import_result.headers}")
+      print(f"ERROR -> {entity_name}s({self.unique_allocator}) - headers: {import_result.headers} message: {import_result.json()['message']}")
       return None
 
   def iot_id(self):
-    entites_from_result = requests.get(
-      f"{CONFIG['sensorThings_base_location']}/{self.__class__.__name__}s?$filter=properties/unique_allocator eq '{self.unique_allocator}'&$select=@iot.id"
-      )
+    entites_from_result = requests.get(f"{CONFIG['sensorThings_base_location']}/{self.iot_id_request_url}")
     if len(entites_from_result.json()["value"]) == 1:
       return entites_from_result.json()["value"][0]["@iot.id"]
     else:
