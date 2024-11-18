@@ -54,13 +54,15 @@
 			"name": "010 Wedding",
 			"description": "Hintergrund - Messstation im städtischen Hintergrund mit für Wohngebiete typischen Messwerten", 
 			"properties": {
+				"unique_allocator": "mc010",
 				"website": "https://luftdaten.berlin.de/station/mc010#station-info",
 				"Messbeginn": "01.11.1984"
 			},
 			"Locations": [{
 				"name": "13353 Wedding, Amrumer Str./Limburger Str.",
 				"description": "Die Station befindet sich an der Beuth Hochschule für Technik.",
-				"encodingType": "application/geo.json",
+				"encodingType": "application/geo+json",
+				"properties": {},
 				"location": {
 					"type": "Point",
 					"coordinates": [13.3493528, 52.542855]
@@ -71,13 +73,15 @@
 			"name": "018 Schöneberg",
 			"description": "Hintergrund - Messstation im städtischen Hintergrund mit für Wohngebiete typischen Messwerten",
 			"properties": {
+				"unique_allocator": "mc018",
 				"website": "https://luftdaten.berlin.de/station/mc018#station-info",
 				"Messbeginn": "01.11.1986"
 			},
 			"Locations": [{
 				"name": "10823 Berlin, Belziger Str. 52",
 				"description": "Tempelhof-Schöneberg, auf dem Gelände des Senatsfuhrparks",
-				"encodingType": "application/geo.json",
+				"encodingType": "application/geo+json",
+				"properties": {},
 				"location": {
 					"type": "Point",
 					"coordinates": [13.3483896, 52.485604]
@@ -88,13 +92,15 @@
 			"name": "027 Marienfelde",
 			"description": "Stadtrand – Station am Stadtrand bzw. im Wald",
 			"properties": {
+				"unique_allocator": "mc027",
 				"website": "https://luftdaten.berlin.de/station/mc027#station-info",
 				"Messbeginn": "01.04.1989"
 			},
 			"Locations": [{
 				"name": "12307 Berlin, Schichauweg 60",
 				"description": "Tempelhof-Schöneberg, auf dem Versuchsfeld Marienfelde des Umweltbundesamtes",
-				"encodingType": "application/geo.json",
+				"encodingType": "application/geo+json",
+				"properties": {},
 				"location": {
 					"type": "Point",
 					"coordinates": [13.3675265, 52.3979086]
@@ -105,13 +111,15 @@
 			"name": "032 Grunewald",
 			"description": "Stadtrand – Station am Stadtrand bzw. im Wald",
 			"properties": {
+				"unique_allocator": "mc032",
 				"website": "https://luftdaten.berlin.de/station/mc032#station-info",
 				"Messbeginn": "01.10.1986"
 			},
 			"Locations": [{
 				"name": "14193 Berlin, Jagen 91",
 				"description": "Charlottenburg-Wilmersdorf, im Forst Grunewald (Waldstation)",
-				"encodingType": "application/geo.json",
+				"encodingType": "application/geo+json",
+				"properties": {},
 				"location": {
 					"type": "Point",
 					"coordinates": [13.2249568, 52.4730805]
@@ -122,13 +130,15 @@
 			"name": "042 Neukölln",
 			"description": "Hintergrund – Messstation im städtischen Hintergrund mit für Wohngebiete typischen Messwerten",
 			"properties": {
+				"unique_allocator": "mc042",
 				"website": "https://luftdaten.berlin.de/station/mc042#station-info",
 				"Messbeginn": "01.03.1986"
 			},
 			"Locations": [{
 				"name": "12047 Berlin, Nansenstr. 10",
 				"description": "Neukölln, auf dem Gelände einer Kindertagesstätte",
-				"encodingType": "application/geo.json",
+				"encodingType": "application/geo+json",
+				"properties": {},
 				"location": {
 					"type": "Point",
 					"coordinates": [13.4308471, 52.4894419]
@@ -139,13 +149,15 @@
 			"name": "077 Buch",
 			"description": "Stadtrand – Station am Stadtrand bzw. im Wald",
 			"properties": {
+				"unique_allocator": "mc077",
 				"website": "https://luftdaten.berlin.de/station/mc077#station-info",
 				"Messbeginn": "01.02.1993"
 			},
 			"Locations": [{
 				"name": "13125 Berlin, Hobrechtsfelder Chaussee 110-113",
 				"description": "Pankow, Ortsteil Buch, auf dem Gelände der Waldschule im Bucher Forst; bis Mitte 2017 am Standort Wiltbergstr. 50 auf dem Gelände des Klinikums Buch",
-				"encodingType": "application/geo.json",
+				"encodingType": "application/geo+json",
+				"properties": {},
 				"location": {
 					"type": "Point",
 					"coordinates": [13.4812949, 52.642739]
@@ -156,13 +168,15 @@
 			"name": "085 Friedrichshagen",
 			"description": "Stadtrand – Station am Stadtrand bzw. im Wald",
 			"properties": {
+				"unique_allocator": "mc085",
 				"website": "https://luftdaten.berlin.de/station/mc085#station-info",
 				"Messbeginn": "01.02.1994"
 			},
 			"Locations": [{
 				"name": "12587 Berlin, Müggelseedamm 307-310",
 				"description": "Treptow-Köpenick, Ortsteil Friedrichshagen, auf dem Gelände des Wasserwerks",
-				"encodingType": "application/geo.json",
+				"encodingType": "application/geo+json",
+				"properties": {},
 				"location": {
 					"type": "Point",
 					"coordinates": [13.6469849, 52.4498991]
@@ -173,13 +187,15 @@
 			"name": "115 Hardenbergplatz",
 			"description": "Verkehr – Station an einer Hauptverkehrsstraße",
 			"properties": {
+				"unique_allocator": "mc115",
 				"website": "https://luftdaten.berlin.de/station/mc115#station-info",
 				"Messbeginn": "01.01.2004"
 			},
 			"Locations": [{
 				"name": "10623 Berlin, Hardenbergplatz",
 				"description": "Charlottenburg-Wilmersdorf, in der Nähe der BVG-Infobox",
-				"encodingType": "application/geo.json",
+				"encodingType": "application/geo+json",
+				"properties": {},
 				"location": {
 					"type": "Point",
 					"coordinates": [13.3328697, 52.5065426]
@@ -190,13 +206,15 @@
 			"name": "117 Schildhornstraße",
 			"description": "Verkehr – Station an einer Hauptverkehrsstraße",
 			"properties": {
+				"unique_allocator": "mc117",
 				"website": "https://luftdaten.berlin.de/station/mc117#station-info",
 				"Messbeginn": "01.11.1994"
 			},
 			"Locations": [{
 				"name": "12163 Berlin, Schildhornstr. 76",
 				"description": "Steglitz-Zehlendorf",
-				"encodingType": "application/geo.json",
+				"encodingType": "application/geo+json",
+				"properties": {},
 				"location": {
 					"type": "Point",
 					"coordinates": [13.3182264, 52.4636001]
@@ -207,13 +225,15 @@
 			"name": "124 Mariendorfer Damm",
 			"description": "Verkehr – Station an einer Hauptverkehrsstraße",
 			"properties": {
+				"unique_allocator": "mc124",
 				"website": "https://luftdaten.berlin.de/station/mc124#station-info",
 				"Messbeginn": "01.01.2008"
 			},
 			"Locations": [{
 				"name": "12099 Berlin, Mariendorfer Damm 148",
 				"description": "Tempelhof-Schöneberg",
-				"encodingType": "application/geo.json",
+				"encodingType": "application/geo+json",
+				"properties": {},
 				"location": {
 					"type": "Point",
 					"coordinates": [13.3877553, 52.4381253]
@@ -224,13 +244,15 @@
 			"name": "144 Silbersteinstraße",
 			"description": "Verkehr – Station an einer Hauptverkehrsstraße",
 			"properties": {
+				"unique_allocator": "mc144",
 				"website": "https://luftdaten.berlin.de/station/mc144#station-info",
 				"Messbeginn": "01.01.2023"
 			},
 			"Locations": [{
 				"name": "12051 Berlin, Silbersteinstr. 5",
 				"description": "Neukölln",
-				"encodingType": "application/geo.json",
+				"encodingType": "application/geo+json",
+				"properties": {},
 				"location": {
 					"type": "Point",
 					"coordinates": [13.4412129, 52.4674609]
@@ -241,13 +263,15 @@
 			"name": "145 Frohnau",
 			"description": "Stadtrand – Station am Stadtrand bzw. im Wald",
 			"properties": {
+				"unique_allocator": "mc145",
 				"website": "https://luftdaten.berlin.de/station/mc145#station-info",
 				"Messbeginn": "01.01.1996"
 			},
 			"Locations": [{
 				"name": "13465 Berlin, Jägerstieg 1",
 				"description": "Reinickendorf",
-				"encodingType": "application/geo.json",
+				"encodingType": "application/geo+json",
+				"properties": {},
 				"location": {
 					"type": "Point",
 					"coordinates": [13.2969908, 52.6534947]
@@ -258,13 +282,15 @@
 			"name": "171 Mitte",
 			"description": "Hintergrund – Messstation im städtischen Hintergrund mit für Wohngebiete typischen Messwerten",
 			"properties": {
+				"unique_allocator": "mc171",
 				"website": "https://luftdaten.berlin.de/station/mc171#station-info",
 				"Messbeginn": "01.01.2003"
 			},
 			"Locations": [{
 				"name": "10179 Berlin, Brückenstr. 6",
 				"description": "Mitte",
-				"encodingType": "application/geo.json",
+				"encodingType": "application/geo+json",
+				"properties": {},
 				"location": {
 					"type": "Point",
 					"coordinates": [13.4188005, 52.5136113]
@@ -275,13 +301,15 @@
 			"name": "174 Frankfurter Allee",
 			"description": "Verkehr – Station an einer Hauptverkehrsstraße",
 			"properties": {
+				"unique_allocator": "mc174",
 				"website": "https://luftdaten.berlin.de/station/mc174#station-info",
 				"Messbeginn": "01.09.1993"
 			},
 			"Locations": [{
 				"name": "10247 Berlin, Frankfurter Allee 86b",
 				"description": "Friedrichshain-Kreuzberg",
-				"encodingType": "application/geo.json",
+				"encodingType": "application/geo+json",
+				"properties": {},
 				"location": {
 					"type": "Point",
 					"coordinates": [13.4701154, 52.5140342]
@@ -292,13 +320,15 @@
 			"name": "190 Leipziger Straße",
 			"description": "Verkehr – Station an einer Hauptverkehrsstraße",
 			"properties": {
+				"unique_allocator": "mc190",
 				"website": "https://luftdaten.berlin.de/station/mc190#station-info",
 				"Messbeginn": "26.03.2020"
 			},
 			"Locations": [{
 				"name": "10117 Berlin, Leipziger Straße 5",
 				"description": "Mitte",
-				"encodingType": "application/geo.json",
+				"encodingType": "application/geo+json",
+				"properties": {},
 				"location": {
 					"type": "Point",
 					"coordinates": [13.382377, 52.5098102]
@@ -309,13 +339,15 @@
 			"name": "221 Karl-Marx-Straße",
 			"description": "Verkehr – Station an einer Hauptverkehrsstraße",
 			"properties": {
+				"unique_allocator": "mc221",
 				"website": "https://luftdaten.berlin.de/station/mc221#station-info",
 				"Messbeginn": "08.06.2021"
 			},
 			"Locations": [{
 				"name": "12043 Berlin, Karl-Marx-Str. 38",
 				"description": "Die Station MC221 auf der Karl-Marx-Straße 38 wird temporär die Station MC220 auf der Karl-Marx-Straße 76 ersetzen, welche auf Grund von Bauarbeiten derzeit außer Betrieb ist",
-				"encodingType": "application/geo.json",
+				"encodingType": "application/geo+json",
+				"properties": {},
 				"location": {
 					"type": "Point",
 					"coordinates": [13.4296633, 52.4838067]
@@ -326,13 +358,15 @@
 			"name": "282 Karlshorst",
 			"description": "Hintergrund – Messstation im städtischen Hintergrund mit für Wohngebiete typischen Messwerten",
 			"properties": {
+				"unique_allocator": "mc282",
 				"website": "https://luftdaten.berlin.de/station/mc282#station-info",
 				"Messbeginn": "01.07.1999"
 			},
 			"Locations": [{
 				"name": "10318 Berlin, Johanna-und-Willy-Brauer-Platz",
 				"description": "Lichtenberg",
-				"encodingType": "application/geo.json",
+				"encodingType": "application/geo+json",
+				"properties": {},
 				"location": {
 					"type": "Point",
 					"coordinates": [13.5295958, 52.4853069]

@@ -1,14 +1,19 @@
 import requests
 import json
 import time
-from TelraamAPI import TelraamAPI
+from Telraam.TelraamAPI import TelraamAPI
 from sensorThings_entities.Location import Location 
 from sensorThings_entities.Thing_V2 import Thing 
 from sensorThings_entities.Datastream import Datastream 
 from sensorThings_entities.Observation import Observation 
+from sensorThings_entities.Sensor import Sensor
+from sensorThings_entities.ObservedProperty import ObservedProperty
 
 with open("config/config.json", mode="r", encoding="utf-8") as read_file:
 	CONFIG = json.load(read_file)
+
+with open("config/telraam_entities.json", mode="r", encoding="utf-8") as read_file:
+	TELRAAM_ENTITIES = json.load(read_file)
 
 def get_sensorThings_entitiy_IDs(entity, id_filter):
 	count = requests.get(f"{CONFIG['sensorThings_base_location']}/{entity}?$count=true")
@@ -126,6 +131,8 @@ def import_new_telraam_instance(instance, things, sensors, observed_properties, 
 	return things
 
 def sync(things, sensors, observed_properties):
+	print(f"\n ########## Start Telraam synchronization ##########\n")
+	
 	time_start = time.strftime('%Y-%m-%d %H:%M:%SZ', time.gmtime(time.time() - 60*60*2))
 	time_end = time.strftime('%Y-%m-%d %H:%M:%SZ', time.gmtime())
 	time_now = time.strftime('%Y-%m-%d %H:%M:%SZ', time.localtime())
@@ -197,3 +204,25 @@ def sync(things, sensors, observed_properties):
 	print(f"\nsync -> imported {number_new_instances} new instances")
 	print(f"sync -> updated observations for {round(update_count)} instances ({round(inactive_count)} not active)")
 	print("sync -> done")
+
+def init():
+
+	# Get things
+	things = {}
+	things_query_result = requests.get(f"{CONFIG['sensorThings_base_location']}/Things")
+	for thing in things_query_result.json()["value"]:
+		if "instance_id" in thing["properties"]:			
+			instance_id = thing["properties"]["instance_id"]
+			things[instance_id] = Thing(instance_id)
+
+	# Get and/or add Sensors
+	sensors = {}
+	for sensor in TELRAAM_ENTITIES["Sensors"]:
+		sensors[sensor] = Sensor(TELRAAM_ENTITIES["Sensors"][sensor])
+
+	# Get and/or add ObservedProperties
+	observed_properties = {}
+	for observed_property in TELRAAM_ENTITIES["ObservedProperties"].values():
+		observed_properties[observed_property["name"]] = ObservedProperty(observed_property)
+
+	return {"things": things, "sensors": sensors, "observed_properties": observed_properties}

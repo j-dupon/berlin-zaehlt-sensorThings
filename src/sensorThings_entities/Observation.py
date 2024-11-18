@@ -7,7 +7,7 @@ with open("config/config.json", mode="r", encoding="utf-8") as read_file:
 
 class Observation(Entity):
 	def __init__(self, result, phenomenonTime, datastream):
-		super().__init__(f"Datastream({datastream}):phenomenonTime")
+		super().__init__(f"Datastream({datastream}):{phenomenonTime}")
 
 		self.result = result 
 		self.phenomenonTime = phenomenonTime 

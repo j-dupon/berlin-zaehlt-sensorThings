@@ -15,7 +15,7 @@ class Datastream(Entity):
 		self.properties = {"unique_allocator": self.unique_allocator}
 		self.unitOfMeasurement = {
 	    "name": observed_property.name,
-	    "symbol": "",
+	    "symbol": observed_property.properties["symbol"],
 	    "definition": self.description
 	  }
 		self.ObservedProperty = {"@iot.id": observed_property.iot_id()}
@@ -36,7 +36,5 @@ class Datastream(Entity):
 		  "ObservedProperty": self.ObservedProperty,
 		  "properties": self.properties
 		}	
-
-		print(f"\n IMPORT JSON: {import_json} \n")
 
 		return json.dumps(import_json)
