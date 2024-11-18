@@ -54,3 +54,4 @@ venv.bak/
 # Files
 src/test.py
 config/test.json
+Archive/

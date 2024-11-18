@@ -14,11 +14,17 @@ Zum Ausführen des Synchronisations-Service muss eine laufende SensorThings API 
 
 - Tech-Stack: Python
 
-Zur Überführung der Telraam-Daten an SensorThings wird ein Skript in Python geschrieben, das alle n Minuten die aktuellen SensorThings Entitäten mit Telraam abgleicht und anpasst. Die Herausforderung liegt in den unterschiedlichen Datenmodellen und den damit einhergehenden abweichenden Verfahren. Zum Beispiel benötigt jede Telraam-Instanz ein zugehöriges Segment, Segmente können aber zu unterschiedlichen Instanzen gehören. In SensorThings wiederum kann eine Location (gemappt auf ein Telraam-Segment) nicht ohne ein Thing (gemappt auf eine Telraam-Instanz) initiiert werden.
+Zur Überführung der Telraam-Daten an SensorThings wird ein Skript in Python
+geschrieben, das alle n Minuten die aktuellen SensorThings Entitäten mit
+Telraam abgleicht und anpasst. Die Herausforderung liegt in den
+unterschiedlichen Datenmodellen und den damit einhergehenden abweichenden
+Verfahren. Zum Beispiel benötigt jede Telraam-Instanz ein zugehöriges
+Segment, Segmente können aber zu unterschiedlichen Instanzen gehören. In
+SensorThings wiederum kann eine Location (gemappt auf ein Telraam-Segment)
+nicht ohne ein Thing (gemappt auf eine Telraam-Instanz) initiiert werden.
 
 ## TODO
 
 - Verbesserung des Quick Start Guide durch ein install/start-Skript mit Einbindung einer FROST Initialisierung
-- Einbindung der erhobenen Sensordaten von Telraam
-- Einbindung weiterer Informationsquellen, z.B. der Berliner Luftqualitätsindex (https://luftdaten.berlin.de/lqi)
-	- Visualisierung der Daten
+- Visualisierung der Daten
+- ...
