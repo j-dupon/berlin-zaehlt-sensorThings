@@ -32,8 +32,12 @@ if __name__ == "__main__":
 	while True:
 		if time.localtime().tm_min == 50:
 			if time.localtime().tm_hour > 7 and time.localtime().tm_hour < 18:
-				telraam.sync(telraam_initialization["things"], telraam_initialization["sensors"], telraam_initialization["observed_properties"])
-				blume.sync(blume_initialization["things"], blume_initialization["stations"])
+				telraam.sync(
+					telraam_initialization["things"], 
+					telraam_initialization["sensors"], 
+					telraam_initialization["observed_properties"]
+					)
+				blume.sync(blume_initialization)
 			else:
 				print("main -> waiting for the sun to rise") 
 			time.sleep(3000)

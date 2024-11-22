@@ -1,4 +1,12 @@
 {
+	"lqi_classifications": {
+		"Stickstoffdioxid": [25, 50, 100, 200, 500],
+		"Schwefeldioxid": [25, 50, 120, 350, 1000],
+		"Ozon": [33, 65, 120, 180, 240],
+		"Kohlenmonoxid": [1, 2, 4, 10, 30],
+		"Feinstaub (PM10)": [10, 20, 35, 50, 100]
+	},
+
 	"Sensors": {
 		"name": "Messcontainer",
 	  "description": "Messcontainer des Berliner Luftgüte-Messnetzes (BLUME)",
@@ -14,38 +22,68 @@
 		"Luftqualitätsindex": {
 			"name": "LQI",
 			"description": "Der Luftqualitätsindex LQI ist ein stundenaktueller Indikator für die allgemeine Luftqualität.",
-			"properties": {},
+			"properties": {
+				"symbol": "LQI Note"
+			},
 			"definition": "https://luftdaten.berlin.de/lqi/info"
 		},
 		"Stickstoffdioxid": { 
 			"name": "Stickstoffdioxid",
-			"description": "Stickstoffdioxid (NO₂, 1-h-Mittelwert)",
+			"description": "Stickstoffdioxid, Messung in Standardmesshöhe über dem Dach des Messcontainers (in ca. 3,5-4 m Höhe) durch automatische Messgeräte",
+			"properties": {
+				"observationType": "Stickstoffdioxid (NO₂, 1-h-Mittelwert)"
+			},
+			"definition": "https://luftdaten.berlin.de/pollution/no2"
+		},
+		"Stickstoffmonoxid": { 
+			"name": "Stickstoffmonoxid",
+			"description": "Stickstoffmonoxid, Messung in Standardmesshöhe über dem Dach des Messcontainers (in ca. 3,5-4 m Höhe) durch automatische Messgeräte",
 			"properties": {},
-			"definition": "https://luftdaten.berlin.de/lqi/info"
+			"definition": "https://luftdaten.berlin.de/pollution/no"
+		},
+		"Stickoxide": { 
+			"name": "Stickoxide",
+			"description": "Summe der Stickoxide (Stickstoffmonoxid und Stickstoffdioxid), angegeben als Stickstoffdioxid (Bei Konzentrationsangaben in µg/m³ ist der Stickoxid-Wert daher i.Allg. höher als die Summe der Einzelwerte.)",
+			"properties": {},
+			"definition": "https://luftdaten.berlin.de/pollution/nox"
 		},
 		"Schwefeldioxid": { 
 			"name": "Schwefeldioxid",
-			"description": "Schwefeldioxid (SO₂, 1-h-Mittelwert)",
-			"properties": {},
-			"definition": "https://luftdaten.berlin.de/lqi/info"
+			"description": "Die Messung von Schwefeldioxid wurde zum 01.06.2020 eingestellt. Bis dahin wurde Schwefeldioxid in Standardmesshöhe über dem Dach des Messcontainers (in ca. 3,5-4 m Höhe) durch automatische Messgeräte gemessen.",
+			"properties": {
+				"observationType": "Schwefeldioxid (SO₂, 1-h-Mittelwert)"
+			},
+			"definition": "https://luftdaten.berlin.de/pollution/so2"
 		},
 		"Ozon": { 
 			"name": "Ozon",
-			"description": "Ozon (O₃, 1-h-Mittelwert)",
-			"properties": {},
-			"definition": "https://luftdaten.berlin.de/lqi/info"
+			"description": "Ozon, Messung in Standardmesshöhe über dem Dach des Messcontainers (in ca. 3,5-4 m Höhe) durch automatische Messgeräte",
+			"properties": {
+				"observationType": "Ozon (O₃, 1-h-Mittelwert)"
+			},
+			"definition": "https://luftdaten.berlin.de/pollution/o3"
 		},
 		"Kohlenmonoxid": { 
 			"name": "Kohlenmonoxid",
-			"description": "Kohlenmonoxid (CO, 8-h-Mittelwert gleitend)",
-			"properties": {},
-			"definition": "https://luftdaten.berlin.de/lqi/info"
+			"description": "Kohlenmonoxid, Messung in Standardmesshöhe über dem Dach des Messcontainers (in ca. 3,5-4 m Höhe) durch automatische Messgeräte",
+			"properties": {
+				"observationType": "Kohlenmonoxid (CO, 8-h-Mittelwert gleitend)"
+			},
+			"definition": "https://luftdaten.berlin.de/pollution/co"
 		},
-		"Feinstaub": { 
-			"name": "Feinstaub",
-			"description": "Feinstaub (PM10, 24-h-Mittelwert gleitend)",
+		"Feinstaub (PM10)": { 
+			"name": "Feinstaub (PM10)",
+			"description": "Feinstaub (PM10) bezeichnet die Masse aller im Gesamtstaub enthaltenen Partikel, deren aerodynamischer Durchmesser kleiner als 10 µm ist. Probenahme über dem Dach des Messcontainers mit automatischen Messgeräten oder Sammlung des Staubes auf Filtern.",
+			"properties": {
+				"observationType": "Feinstaub (PM10, 24-h-Mittelwert gleitend)"
+			},
+			"definition": "https://luftdaten.berlin.de/pollution/pm10"
+		},
+		"Feinstaub (PM2,5)": { 
+			"name": "Feinstaub (PM2,5)",
+			"description": "Feinstaub (PM2,5) bezeichnet die Masse aller im Gesamtstaub enthaltenen Partikel, deren aerodynamischer Durchmesser kleiner als 2,5 µm ist. Probenahme über dem Dach des Messcontainers mit automatischen Messgeräten oder Sammlung des Staubes auf Filtern.",
 			"properties": {},
-			"definition": "https://luftdaten.berlin.de/lqi/info"
+			"definition": "https://luftdaten.berlin.de/pollution/pm2"
 		}
 	},
 
