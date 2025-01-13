@@ -1,0 +1,142 @@
+{
+	"Things": {
+    	"name": "Telraam instance",
+    	"description": "Telraam device for counting traffic on a street segment"
+	},
+
+	"Locations": {
+		"name": "Segment",
+    	"description": "Road segment of the Telraam Instance",
+    	"encodingType": "application/geo+json"
+	},
+
+	"Sensors": {
+		"Telraam_S2": {
+			"name": "Telraam S2",
+			"description": "The Telraam S2 device counts, categorises and reports all activity on the street",
+			"encodingType": "text",
+			"metadata": "https://telraam.net/en/S2"
+		},
+		"Telraam_V1": {
+			"name": "Telraam V1",
+			"description": "Telraam V1 uses computer vision (OpenCV) on a Raspberry Pi to detect objects in front of a constant (periodically recalculated median) background.",
+			"encodingType": "text",
+			"metadata": "https://telraam.net/en/v1"
+		},
+		"Unknown": {
+			"name": "unknown",
+			"description": "This field has not been filled out",
+			"encodingType": "text",
+			"metadata": "https://telraam.net/en/v1"
+		}
+	},
+
+	"ObservedProperties": {
+		"heavy": { 
+			"name": "heavy",
+			"description": "The number of heavy vehicles on this day (and in this hour)",
+			"properties": {"symbol": ""},
+			"definition": "https://documenter.getpostman.com/view/8210376/TWDRqyaV#864d7e84-7c19-4591-b990-06dc8a1b191b"
+			
+		},
+		"car": { 
+			"name": "car",
+			"description": "The number of cars",
+			"properties": {"symbol": ""},
+			"definition": "https://documenter.getpostman.com/view/8210376/TWDRqyaV#864d7e84-7c19-4591-b990-06dc8a1b191b"
+			
+		},
+		"bike": { 
+			"name": "bike",
+			"description": "The number of two-wheelers (mainly cyclists and motorbikes)",
+			"properties": {"symbol": ""},
+			"definition": "https://documenter.getpostman.com/view/8210376/TWDRqyaV#864d7e84-7c19-4591-b990-06dc8a1b191b"
+			
+		},
+		"pedestrian": { 
+			"name": "pedestrian",
+			"description": "The number of pedestrians",
+			"properties": {"symbol": ""},
+			"definition": "https://documenter.getpostman.com/view/8210376/TWDRqyaV#864d7e84-7c19-4591-b990-06dc8a1b191b"
+			
+		},
+		"heavy_lft": { 
+			"name": "heavy_lft",
+			"description": "_lft means traffic moving to the left from the point of the view of the camera",
+			"properties": {"symbol": ""},
+			"definition": "https://documenter.getpostman.com/view/8210376/TWDRqyaV#864d7e84-7c19-4591-b990-06dc8a1b191b"
+			
+		},
+		"heavy_rgt": { 
+			"name": "heavy_rgt",
+			"description": "_rgt means traffic moving to the right from the point of the view of the camera",
+			"properties": {"symbol": ""},
+			"definition": "https://documenter.getpostman.com/view/8210376/TWDRqyaV#864d7e84-7c19-4591-b990-06dc8a1b191b"
+			
+		},
+		"car_lft": { 
+			"name": "car_lft",
+			"description": "_lft means traffic moving to the left from the point of the view of the camera",
+			"properties": {"symbol": ""},
+			"definition": "https://documenter.getpostman.com/view/8210376/TWDRqyaV#864d7e84-7c19-4591-b990-06dc8a1b191b"
+			
+		},
+		"car_rgt": { 
+			"name": "car_rgt",
+			"description": "_rgt means traffic moving to the right from the point of the view of the camera",
+			"properties": {"symbol": ""},
+			"definition": "https://documenter.getpostman.com/view/8210376/TWDRqyaV#864d7e84-7c19-4591-b990-06dc8a1b191b"
+			
+		},
+		"bike_lft": { 
+			"name": "bike_lft",
+			"description": "_lft means traffic moving to the left from the point of the view of the camera",
+			"properties": {"symbol": ""},
+			"definition": "https://documenter.getpostman.com/view/8210376/TWDRqyaV#864d7e84-7c19-4591-b990-06dc8a1b191b"
+			
+		},
+		"bike_rgt": { 
+			"name": "bike_rgt",
+			"description": "_rgt means traffic moving to the right from the point of the view of the camera",
+			"properties": {"symbol": ""},
+			"definition": "https://documenter.getpostman.com/view/8210376/TWDRqyaV#864d7e84-7c19-4591-b990-06dc8a1b191b"
+			
+		},
+		"pedestrian_lft": { 
+			"name": "pedestrian_lft",
+			"description": "_lft means traffic moving to the left from the point of the view of the camera",
+			"properties": {"symbol": ""},
+			"definition": "https://documenter.getpostman.com/view/8210376/TWDRqyaV#864d7e84-7c19-4591-b990-06dc8a1b191b"
+			
+		},
+		"pedestrian_rgt": { 
+			"name": "pedestrian_rgt",
+			"description": "_rgt means traffic moving to the right from the point of the view of the camera",
+			"properties": {"symbol": ""},
+			"definition": "https://documenter.getpostman.com/view/8210376/TWDRqyaV#864d7e84-7c19-4591-b990-06dc8a1b191b"
+			
+		},
+		"car_speed_hist_0to70plus": { 
+			"name": "car_speed_hist_0to70plus",
+			"description": "The estimated car speed distribution in 10 km/h bins from 0 to 70+ km/h (in percentage of the total 100%)",
+			"properties": {"symbol": ""},
+			"definition": "https://documenter.getpostman.com/view/8210376/TWDRqyaV#864d7e84-7c19-4591-b990-06dc8a1b191b"
+			
+		},
+		"car_speed_hist_0to120plus": { 
+			"name": "car_speed_hist_0to120plus",
+			"description": "The estimated car speed distribution in 5 km/h bins from 0 to 120+ km/h (in percentage of the total 100%)",
+			"properties": {"symbol": ""},
+			"definition": "https://documenter.getpostman.com/view/8210376/TWDRqyaV#864d7e84-7c19-4591-b990-06dc8a1b191b"
+			
+		},
+		"v85": { 
+			"name": "v85",
+			"description": "The estimated car speed limit in km/h that 85% of all cars respect (15% of drivers drive faster than this limit).",
+			"properties": {"symbol": ""},
+			"definition": "https://documenter.getpostman.com/view/8210376/TWDRqyaV#864d7e84-7c19-4591-b990-06dc8a1b191b"
+			
+		}
+	
+	}
+}

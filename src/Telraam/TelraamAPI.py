@@ -1,5 +1,8 @@
 import requests
 import json
+import logger
+
+LOGGER = logger.log
 
 class TelraamAPI:
 
@@ -7,12 +10,12 @@ class TelraamAPI:
 		self.api_key_header = api_key_header
 		self.base_url = base_url
 
-	def get_traffic_snapshot(self, area):
+	def get_traffic_snapshot(self, settings):
 		url = f"{self.base_url}/reports/traffic_snapshot"
 		body = {
-				"time":"live",
-				"contents":"minimal",
-				"area":area
+			"time": settings["time"],
+			"contents": settings["contents"],
+			"area": settings["berlin_area"]
 		}	
 		return self.telraam_post(url, body)
 
@@ -23,7 +26,14 @@ class TelraamAPI:
 		url = f"{self.base_url}/cameras/segment/{segment_id}"
 		return self.telraam_get(url)
 
-	def get_traffic(self, body):
+	def get_traffic(self, settings):
+		body = {
+		  "level": settings["level"],
+		  "format": settings["format"],
+		  "id": settings["id"],
+		  "time_start": settings["time_start"],
+		  "time_end": settings["time_end"]
+		}	
 		return self.telraam_post(f"{self.base_url}/reports/traffic", body)
 
 	def get_segments(self):
@@ -40,7 +50,7 @@ class TelraamAPI:
 				return {"ok": 0, "error_message": res.json()}
 			return {"ok": 1, "result": res}
 		except RuntimeError as err:
-			print(f"ERROR -> telraam_get: {err}")
+			LOGGER.err.error(f"ERROR -> telraam_get: {err}")
 			return {"ok": 0, "error_message": err}
 
 	def telraam_post(self, url, body):
@@ -50,5 +60,5 @@ class TelraamAPI:
 				return {"ok": 0, "error_message": res.json()}
 			return {"ok": 1, "result": res}
 		except RuntimeError as err:
-			print(f"ERROR -> telraam_post: {err}")
+			LOGGER.err.error(f"ERROR -> telraam_post: {err}")
 			return {"ok": 0, "error_message": err}

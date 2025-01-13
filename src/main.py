@@ -1,16 +1,19 @@
 import requests
 import json
 import time
-from sync import sync
-from TelraamAPI import TelraamAPI
+import BLUME.init_blume as blume
+import Telraam.init_telraam as telraam
+import logger
+
+LOGGER = logger.log
 
 with open("config/config.json", mode="r", encoding="utf-8") as read_file:
 	CONFIG = json.load(read_file)
 
 def check_sensorThings_connection():
 	try: 
-		res = requests.get(CONFIG["sensorThings_base_location"])
-		if not res.ok:
+		request_result = requests.get(CONFIG["sensorThings_base_location"])
+		if not request_result.ok:
 			return 0
 		return 1
 	except:
@@ -19,11 +22,30 @@ def check_sensorThings_connection():
 if __name__ == "__main__":
 
 	if not check_sensorThings_connection():
-		print("ERROR -> sync: not connected to sensorThingsAPI")
+		LOGGER.err.error("main: not connected to sensorThingsAPI")
 		exit()
 
-	telraam_api = TelraamAPI(CONFIG["telraam_key_header"], CONFIG["telraam_base_location"])
+	LOGGER.log.info("##########################################")
+	LOGGER.log.info("Initiate SensorThings API synchronization")
+	LOGGER.log.info("##########################################\n")
+
+	telraam_initialization = telraam.init()
+
+	if CONFIG["sync_blume"]:
+		blume_initialization = blume.init()
 
 	while True:
-		sync(telraam_api)
-		time.sleep(CONFIG["sync_timer_in_seconds"])
+		if time.localtime().tm_min == 50:
+			if time.localtime().tm_hour > 7 and time.localtime().tm_hour < 18:
+				telraam.sync(
+					telraam_initialization["things"], 
+					telraam_initialization["sensors"], 
+					telraam_initialization["observed_properties"]
+					)
+			else:
+				LOGGER.log.info("main@telraam.sync -> waiting for the sun to rise") 
+			if CONFIG["sync_blume"]:
+				blume.sync(blume_initialization)
+			time.sleep(3000)
+		else:
+			time.sleep(55)

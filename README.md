@@ -8,17 +8,32 @@ Dieses Projekt hat zum Ziel, die in Berlin erhobenen Telraam-Daten an eine Senso
 
 ## Quick Start Guide
 
-Zum Ausführen des Synchronisations-Service muss eine laufende SensorThings API vorhanden sein (siehe https://fraunhoferiosb.github.io/FROST-Server/deployment/docker.html) und die URL für den Server in `src/config/config.json` im Feld `sensorThings_base_location` gesetzt werden. Zusätzlich benötigt die Telraam API einen X-API-Key zur Autorisierung. Diesen ebenfalls in der Konfigurationsdatei im Feld `telraam_key_header.X-Api-Key` hinterlegen. Dann kann zum Starten des Skripts `src/main.py` ausgeführt werden.
+- Teck-Stack: Docker, Python
+
+Hinweis: Dieser Quick Start Guide wurde auf Debian getestet
+
+Zum Ausführen des Service muss eine laufende SensorThings API vorhanden sein (siehe **FROST-Server** https://fraunhoferiosb.github.io/FROST-Server/deployment/docker.html). Die entprechende docker-compose Datei für den FROST-Server liegt auch in diesem Repository unter `src/config` und kann wie folgt verwendet werden: 
+
+```bash
+sudo docker compose up
+```
+
+1. Die URL der SensorThingsAPI (FROST-Server) muss in `src/config/config.json` im Feld `sensorThings_base_location` gesetzt werden (Default von FROST: `http://localhost:8080/FROST-Server/v1.1`)
+2. Die Telraam API benötigt einen X-API-Key zur Autorisierung. Diesen ebenfalls in der Konfigurationsdatei im Feld `telraam_key_header.X-Api-Key` hinterlegen.
+3. Dann kann zum Starten des Service `src/main.py` ausgeführt werden. Alternativ kann die Synchronisation mit `src/trigger_telraam_sync.py` einmalig ausgeführt werden.
+4. Jeweils 10 Minuten vor einer vollen Stunde synchronisiert der Service die Telraam Daten.
+
+`Logs` werden unter `src/logs` erstellt.
 
 ## Implementierung
 
 - Tech-Stack: Python
 
-Zur Überführung der Telraam-Daten an SensorThings wird ein Skript in Python geschrieben, das alle n Minuten die aktuellen SensorThings Entitäten mit Telraam abgleicht und anpasst. Die Herausforderung liegt in den unterschiedlichen Datenmodellen und den damit einhergehenden abweichenden Verfahren. Zum Beispiel benötigt jede Telraam-Instanz ein zugehöriges Segment, Segmente können aber zu unterschiedlichen Instanzen gehören. In SensorThings wiederum kann eine Location (gemappt auf ein Telraam-Segment) nicht ohne ein Thing (gemappt auf eine Telraam-Instanz) initiiert werden.
-
-## TODO
-
-- Verbesserung des Quick Start Guide durch ein install/start-Skript mit Einbindung einer FROST Initialisierung
-- Einbindung der erhobenen Sensordaten von Telraam
-- Einbindung weiterer Informationsquellen, z.B. der Berliner Luftqualitätsindex (https://luftdaten.berlin.de/lqi)
-	- Visualisierung der Daten
+Zur Überführung der Telraam-Daten an SensorThings wird ein Skript in Python
+geschrieben, das stündlich die aktuellen SensorThings Entitäten mit
+Telraam abgleicht und anpasst. Die Herausforderung liegt in den
+unterschiedlichen Datenmodellen und den damit einhergehenden abweichenden
+Verfahren. Zum Beispiel benötigt jede Telraam-Instanz ein zugehöriges
+Segment, Segmente können aber zu unterschiedlichen Instanzen gehören. In
+SensorThings wiederum kann eine Location (gemappt auf ein Telraam-Segment)
+nicht ohne ein Thing (gemappt auf eine Telraam-Instanz) initiiert werden.

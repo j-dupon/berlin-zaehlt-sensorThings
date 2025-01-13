@@ -1,47 +1,35 @@
-import json
-import requests
+from .Entity import *
 
-class Thing:
-  def __init__(self, user_id, instance_id, segment_id):
-    self.name = "Telraam instance"
-    self.description = "Telraam device for counting traffic on a street segment"
-    self.user_id = user_id
-    self.segment_id = segment_id
-    self.instance_id = instance_id
+with open("config/config.json", mode="r", encoding="utf-8") as read_file:
+  CONFIG = json.load(read_file)
 
-  def get_import_json(self):
+class Thing(Entity):
+  def __init__(self, unique_allocator, **kwargs):
+    super().__init__(unique_allocator)
+    self.iot_id_request_url = f"Things?$filter=properties/unique_allocator eq '{unique_allocator}'&$select=@iot.id"
+
+    if not kwargs.keys():
+      thing = requests.get(f"{CONFIG['sensorThings_base_location']}/Things({self.iot_id()})")
+      kwargs = thing.json()
+
+    self.name = kwargs["name"]
+    self.description = kwargs["description"]
+    self.properties = kwargs["properties"]
+
+    if kwargs.keys():
+      self.properties["unique_allocator"] = unique_allocator
+      self.iot_id()
+
+  def import_json(self):
     import_json = {
       "name": self.name,
       "description": self.description,
-      "properties": {
-        "user_id": self.user_id,
-        "segment_id": self.segment_id,
-        "instance_id": self.instance_id  # unique
-      }
+      "properties": self.properties
     }
     return json.dumps(import_json)
 
-  def import_self(self, sensorThings_base_url):
-    exists_iot_id = self.get_iot_id(sensorThings_base_url)
-    if exists_iot_id["ok"]:
-      print(f"ERROR -> Thing@instance_id({self.instance_id}): Thing with instance_id already exists!")
-      return None
-
-    import_result = requests.post(f"{sensorThings_base_url}/Things", data = self.get_import_json())
-
-    if import_result.ok:
-      thing = requests.get(import_result.headers["Location"])
-      print(f"Thing@iot.id({thing.json()['@iot.id']}) -> success - imported new Thing: instance_id({self.instance_id}), user_id({self.user_id}), segment_id({self.segment_id}), Thing: {thing.json()}")
-      return thing.json()["@iot.id"]
-    else:
-      print(f"ERROR -> Thing@instance_id({self.instance_id}): {import_result.headers}")
-      return None
-    
-  def get_iot_id(self, sensorThings_base_url):
-    thing_query_url = f"{sensorThings_base_url}/Things?$filter=properties/instance_id eq {self.instance_id}"
-    things = requests.get(thing_query_url)
-    if len(things.json()["value"]) == 1:
-      return {"ok": 1, "result": things.json()["value"][0]["@iot.id"]}
-    else:
-      return {"ok": 0 , "result": things.json()}
-    
+  def datastreams(self):
+    datastreams_query_result = requests.get(
+      f"{CONFIG['sensorThings_base_location']}/Things({self.iot_id()})/Datastreams?$select=@iot.id,unitOfMeasurement/name"
+      )
+    return datastreams_query_result.json()["value"]

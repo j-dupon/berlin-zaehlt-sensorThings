@@ -1,70 +1,53 @@
-import json
-import requests
+from .Entity import *
 
-class Location:
-  def __init__(self, segment_id, geometry):
-    self.name = "Segment"
-    self.description = "Road segment of the Telraam Instance"
-    self.segment_id = segment_id
-    self.encodingType = "application/geo+json"
-    self.location = geometry
-    self.Things = []
+with open("config/config.json", mode="r", encoding="utf-8") as read_file:
+  CONFIG = json.load(read_file)
+
+class Location(Entity):
+  def __init__(self, unique_allocator, **kwargs):
+    super().__init__(unique_allocator)
+    self.iot_id_request_url = f"Locations?$filter=properties/unique_allocator eq '{unique_allocator}'&$select=@iot.id"
+
+    if not kwargs.keys():
+      location = requests.get(
+        f"{CONFIG['sensorThings_base_location']}/Locations({self.iot_id()})?$expand=Things($select=@iot.id)"
+        )
+      kwargs = location.json()
+
+    self.name = kwargs["name"]
+    self.description = kwargs["description"]
+    self.encodingType = kwargs["encodingType"]
+    self.Things = kwargs["Things"]
+    self.location = kwargs["location"]   
+    self.properties = kwargs["properties"]
+
+    if kwargs.keys():
+      self.properties["unique_allocator"] = unique_allocator
+      self.iot_id()
 
   def link_to_things(self, iotIDs):
     self.Things += [iot_id for iot_id in iotIDs]
     return self.Things
 
-  def get_import_json(self):
+  def import_json(self):
     import_json = {
       "name": self.name,
       "description": self.description,
-      "properties": {
-          "segment_id": self.segment_id
-        },
+      "properties": self.properties,
       "encodingType": self.encodingType,
       "location": self.location,
       "Things": self.Things
     }
     return json.dumps(import_json)
 
-  def import_self(self, sensorThings_base_url):
-    exists_iot_id = self.get_iot_id(sensorThings_base_url)
-    if exists_iot_id["ok"]:
-      print(f"ERROR -> Location@segment_id({self.segment_id}): Location with segment_id already exists!")
-      return None
-
-    import_result = requests.post(f"{sensorThings_base_url}/Locations", data = self.get_import_json())
-    
-    if import_result.ok:
-      location = requests.get(import_result.headers["Location"])
-      print(f"Location@iot.id({location.json()['@iot.id']}) -> success - imported new Location({self.segment_id}) for Thing(s)({self.Things}), Location: {location.json()}")
-      return location.json()["@iot.id"]
-    else:
-      print(f"ERROR -> Location@segment_id({self.segment_id}): {import_result.headers}")
-      return None
-
-  def update_self(self, sensorThings_base_url):
-    exists_iot_id = self.get_iot_id(sensorThings_base_url)
-    if not exists_iot_id["ok"]:
-      print(f"ERROR -> Location@segment_id({self.segment_id}): error finding unique iot_id - {exists_iot_id['result']}")
-      return None
-
-    iot_id = exists_iot_id["result"]
-    update_result = requests.patch(f"{sensorThings_base_url}/Locations({iot_id})", data = self.get_import_json())
+  def update_self(self):
+    iot_id = super().iot_id()
+    update_result = requests.patch(f"{CONFIG['sensorThings_base_location']}/Locations({iot_id})", data = self.import_json())
 
     if update_result.ok:
-      location = requests.get(f"{sensorThings_base_url}/Locations({iot_id})")
-      print(f"Location@iot.id({iot_id}) -> success - updated Location({self.segment_id}) for Thing(s)({self.Things}), Location: {location.json()}")
+      location = requests.get(f"{CONFIG['sensorThings_base_location']}/Locations({iot_id})")
+      self.logger.log.debug(f"Location@iot.id({iot_id}) -> success - updated Location({self.unique_allocator}) for Thing(s)({self.Things}), Location: {location.json()}")
       return iot_id
     else:
-      print(f"ERROR -> Location@iot.id({iot_id}): {update_result.json()}")
+      self.logger.err.error(f"Location@iot.id({iot_id}): {update_result.json()}")
       return None
-
-
-  def get_iot_id(self, sensorThings_base_url):
-    location_query_url = f"{sensorThings_base_url}/Locations?$filter=properties/segment_id eq {self.segment_id}"
-    res = requests.get(location_query_url)
-    if len(res.json()["value"]) == 1:
-      return {"ok": 1, "result": res.json()["value"][0]["@iot.id"]}
-    else:
-      return {"ok": 0 , "result": res.json()}
