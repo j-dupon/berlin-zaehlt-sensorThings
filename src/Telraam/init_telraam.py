@@ -46,7 +46,7 @@ def get_telraam_data(telraam_api):
 	# Get a list of Telraam segments in Berlin
 	telraam_snapshots = telraam_api.get_traffic_snapshot(CONFIG["telraam_traffic_snapshot"])
 	if not telraam_snapshots['ok']:
-		LOGGER.err.error(f"sync: {telraam_snapshots["error_message"]}")
+		LOGGER.err.error(f"sync: {telraam_snapshots['error_message']}")
 		return 1
 
 	telraam_segments_berlin = {}
@@ -59,7 +59,7 @@ def get_telraam_data(telraam_api):
 	time.sleep(2)
 	telraam_instances = telraam_api.get_instances()
 	if not telraam_instances['ok']:
-		LOGGER.err.error(f"sync: {telraam_snapshots["error_message"]}")
+		LOGGER.err.error(f"sync: {telraam_snapshots['error_message']}")
 		return 1
 
 	telraam_instances = telraam_instances['result'].json()['cameras']
