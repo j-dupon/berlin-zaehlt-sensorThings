@@ -2,11 +2,10 @@ import requests
 import json
 import csv
 import time
-from sensorThings_entities.Sensor import Sensor
-from sensorThings_entities.ObservedProperty import ObservedProperty
-from sensorThings_entities.Thing_V2 import Thing 
-from sensorThings_entities.Datastream import Datastream
-from sensorThings_entities.Observation import Observation
+import sensorThings_entities
+import logger
+
+LOGGER = logger.log
 
 with open("config/config.json", mode="r", encoding="utf-8") as read_file:
 	CONFIG = json.load(read_file)
@@ -25,7 +24,7 @@ def lqi_classification(metric, result):
 	return 6
 
 def sync(things):
-	print(f"\n ########## Start BLUME synchronization ##########\n")
+	LOGGER.log.info(f"\n\n########## Start BLUME synchronization ##########\n")
 	
 	end_time = time.strftime('%H', time.localtime())
 	date = time.strftime('%d.%m.%Y', time.localtime())
@@ -35,7 +34,6 @@ def sync(things):
 	for station in BLUME_ENTITIES["stations"]:
 
 		blume_data_query_result = requests.get(f'https://luftdaten.berlin.de/station/{station}.csv?group=pollution&period=1h&timespan=custom&start%5Bdate%5D={date}&start%5Bhour%5D={int(end_time)-1}&end%5Bdate%5D={date}&end%5Bhour%5D={end_time}')
-		#print(f'https://luftdaten.berlin.de/station/{station}.csv?group=pollution&period=1h&timespan=custom&start%5Bdate%5D={date}&start%5Bhour%5D={int(end_time)-1}&end%5Bdate%5D={date}&end%5Bhour%5D={end_time}')
 		blume_data = list(csv.reader(blume_data_query_result.text.splitlines(), delimiter=';'))
 		result_time = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.strptime(blume_data[5][0], '%d.%m.%Y %H:%M'))
 
@@ -60,12 +58,11 @@ def sync(things):
 			if lqi_grade_metric > lqi_grade_station:
 				lqi_grade_station = lqi_grade_metric
 			
-			#Observation(result, result_time, datastream["@iot.id"])			
-			# TODO: observation for lqi of metric
+			sensorThings_entities.Observation(result, result_time, datastream["@iot.id"])			
 
-		Observation(lqi_grade_station, result_time, lqi_iot_id)			
+		sensorThings_entities.Observation(lqi_grade_station, result_time, lqi_iot_id)			
 
-	print(f"sync -> updated observations for {round(update_count)} BLUME stations")
+	LOGGER.log.info(f"sync -> updated observations for {round(update_count)} BLUME stations")
 
 def init():
 	stations = BLUME_ENTITIES["stations"]
@@ -83,13 +80,13 @@ def init():
 				f"{CONFIG['sensorThings_base_location']}/Things",
 				json.dumps(stations[station])
 				)
-		things[station] = Thing(stations[station]["properties"]["unique_allocator"])
+		things[station] = sensorThings_entities.Thing(stations[station]["properties"]["unique_allocator"])
 
 # Init Sensors
-	sensor = Sensor(messcontainer)
+	sensor = sensorThings_entities.Sensor(messcontainer)
 
 # Init ObservedProperties and Datastreams
-	observed_property_lqi = ObservedProperty(lqi)
+	observed_property_lqi = sensorThings_entities.ObservedProperty(lqi)
 
 	start_time = time.strftime('%H', time.localtime())
 	date = time.strftime('%d.%m.%Y', time.localtime())
@@ -97,10 +94,9 @@ def init():
 	update_count = 0
 
 	for station in stations:
-		Datastream(observed_property_lqi, sensor, things[station])
+		sensorThings_entities.Datastream(observed_property_lqi, sensor, things[station])
 
-		#blume_data_query_result = requests.get(f"https://luftdaten.berlin.de/station/{station}.csv?group=pollution&period=1h&timespan=custom&start%5Bdate%5D={date}&start%5Bhour%5D={start_time}&end%5Bdate%5D={date}&end%5Bhour%5D={int(start_time)+1}")
-		blume_data_query_result = requests.get(f"https://luftdaten.berlin.de/station/{station}.csv?group=pollution&period=1h&timespan=custom&start%5Bdate%5D={date}&start%5Bhour%5D=15&end%5Bdate%5D={date}&end%5Bhour%5D=15")
+		blume_data_query_result = requests.get(f"https://luftdaten.berlin.de/station/{station}.csv?group=pollution&period=1h&timespan=custom&start%5Bdate%5D={date}&start%5Bhour%5D={start_time}&end%5Bdate%5D={date}&end%5Bhour%5D={int(start_time)+1}")
 		blume_data = list(csv.reader(blume_data_query_result.text.splitlines(), delimiter=';'))
 
 		blume_metrics = blume_data[1]
@@ -116,7 +112,7 @@ def init():
 				observed_property["description"] = f"{blume_metric} in {symbol}"
 
 			observed_property["properties"]["symbol"] = symbol
-			observed_property = ObservedProperty(observed_property)
-			datastream = Datastream(observed_property, sensor, things[station])
+			observed_property = sensorThings_entities.ObservedProperty(observed_property)
+			datastream = sensorThings_entities.Datastream(observed_property, sensor, things[station])
 
 	return things

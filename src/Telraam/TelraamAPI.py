@@ -1,5 +1,8 @@
 import requests
 import json
+import logger
+
+LOGGER = logger.log
 
 class TelraamAPI:
 
@@ -47,7 +50,7 @@ class TelraamAPI:
 				return {"ok": 0, "error_message": res.json()}
 			return {"ok": 1, "result": res}
 		except RuntimeError as err:
-			print(f"ERROR -> telraam_get: {err}")
+			LOGGER.err.error(f"ERROR -> telraam_get: {err}")
 			return {"ok": 0, "error_message": err}
 
 	def telraam_post(self, url, body):
@@ -57,5 +60,5 @@ class TelraamAPI:
 				return {"ok": 0, "error_message": res.json()}
 			return {"ok": 1, "result": res}
 		except RuntimeError as err:
-			print(f"ERROR -> telraam_post: {err}")
+			LOGGER.err.error(f"ERROR -> telraam_post: {err}")
 			return {"ok": 0, "error_message": err}

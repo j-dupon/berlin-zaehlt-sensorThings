@@ -1,6 +1,4 @@
-import requests
-import json
-from .Entity import Entity
+from .Entity import *
 
 with open("config/config.json", mode="r", encoding="utf-8") as read_file:
   CONFIG = json.load(read_file)

@@ -3,10 +3,6 @@
 	"telraam_base_location": "https://telraam-api.net/v1",
 	"sync_timer_in_seconds.depricated": 3600,
 	"telraam_key_header": {
-		"X-Api-Key": "yivGlap2xB5scqBXDB3AJ8NTGcemuTOb2KkZMHNI",
-		"Content-Type": "application/json"
-	},
-	"telraam_key_header_2": {
 		"X-Api-Key": "dqjoL0N6rCCQNAVuJqGi5hiIKWGYiNT1fZWWd7C8",
 		"Content-Type": "application/json"
 	},
@@ -14,5 +10,12 @@
 		"time": "live",
 		"contents": "minimal",
 		"berlin_area":"13.398872, 52.511014, 2"
-	}
+	},
+	"logging": {
+  		"format": "{asctime} - {levelname}: {message}",
+  		"style": "{",
+  		"datefmt": "%Y-%m-%d %H:%M:%S",
+  		"path": "logs/"
+	},
+	"sync_blume": false
 }

@@ -1,6 +1,4 @@
-import json
-import requests
-from .Entity import Entity
+from .Entity import *
 
 with open("config/config.json", mode="r", encoding="utf-8") as read_file:
   CONFIG = json.load(read_file)
@@ -48,8 +46,8 @@ class Location(Entity):
 
     if update_result.ok:
       location = requests.get(f"{CONFIG['sensorThings_base_location']}/Locations({iot_id})")
-      print(f"Location@iot.id({iot_id}) -> success - updated Location({self.unique_allocator}) for Thing(s)({self.Things}), Location: {location.json()}")
+      self.logger.log.debug(f"Location@iot.id({iot_id}) -> success - updated Location({self.unique_allocator}) for Thing(s)({self.Things}), Location: {location.json()}")
       return iot_id
     else:
-      print(f"ERROR -> Location@iot.id({iot_id}): {update_result.json()}")
+      self.logger.err.error(f"Location@iot.id({iot_id}): {update_result.json()}")
       return None

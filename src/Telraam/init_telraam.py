@@ -1,13 +1,11 @@
 import requests
 import json
 import time
+import sensorThings_entities
 from Telraam.TelraamAPI import TelraamAPI
-from sensorThings_entities.Location import Location 
-from sensorThings_entities.Thing_V2 import Thing 
-from sensorThings_entities.Datastream import Datastream 
-from sensorThings_entities.Observation import Observation 
-from sensorThings_entities.Sensor import Sensor
-from sensorThings_entities.ObservedProperty import ObservedProperty
+import logger
+
+LOGGER = logger.log
 
 with open("config/config.json", mode="r", encoding="utf-8") as read_file:
 	CONFIG = json.load(read_file)
@@ -37,17 +35,18 @@ def delete_outdated_entities(entity, telraamIDs, sensorThingsIDs):
 			iot_id = result_iot_id_query.json()["value"][0]["@iot.id"]
 			result_delete_entity = requests.delete(f"{CONFIG['sensorThings_base_location']}/{entity}({iot_id})")
 			if result_delete_entity.ok:
-				print(f"sync -> deleted {entity}({iot_id})")
+				LOGGER.log.info(f"sync -> deleted {entity}({iot_id})")
 			else:
-				print(f"ERROR -> sync: {result_delete_entity.json()}")
+				LOGGER.err.error(f"sync: {result_delete_entity.json()}")
 		else:
-			print(f"ERROR -> sync: found {result_iot_id_query.json()['value']} for {entity_id} of {entity}")
+			LOGGER.err.error(f"sync: found {result_iot_id_query.json()['value']} for {entity_id} of {entity}")
 
 def get_telraam_data(telraam_api):
 	
 	# Get a list of Telraam segments in Berlin
 	telraam_snapshots = telraam_api.get_traffic_snapshot(CONFIG["telraam_traffic_snapshot"])
 	if not telraam_snapshots['ok']:
+		LOGGER.err.error(f"sync: {telraam_snapshots["error_message"]}")
 		return 1
 
 	telraam_segments_berlin = {}
@@ -60,6 +59,7 @@ def get_telraam_data(telraam_api):
 	time.sleep(2)
 	telraam_instances = telraam_api.get_instances()
 	if not telraam_instances['ok']:
+		LOGGER.err.error(f"sync: {telraam_snapshots["error_message"]}")
 		return 1
 
 	telraam_instances = telraam_instances['result'].json()['cameras']
@@ -77,12 +77,12 @@ def import_new_telraam_instance(instance, things, sensors, observed_properties, 
 	instance_id = instance['instance_id']  
 	segment_id = instance['segment_id']
 
-	print(f"\nsync@instance_id({instance_id}) -> found new instance({instance_id}) with segment_id({segment_id}))")
+	LOGGER.log.info(f"\nsync@instance_id({instance_id}) -> found new instance({instance_id}) with segment_id({segment_id}))")
 
 	with open("config/telraam_entities.json", mode="r", encoding="utf-8") as read_file:
 		TELRAAM_ENTITIES = json.load(read_file)
 
-	things[instance_id] = Thing(
+	things[instance_id] = sensorThings_entities.Thing(
 		instance_id, 
 		name = TELRAAM_ENTITIES["Things"]["name"],
 		description = TELRAAM_ENTITIES["Things"]["description"],
@@ -105,13 +105,13 @@ def import_new_telraam_instance(instance, things, sensors, observed_properties, 
 
 	# Import datastreams
 	for observed_property in observed_properties:
-		datastream = Datastream(observed_properties[observed_property], sensor, thing)
+		datastream = sensorThings_entities.Datastream(observed_properties[observed_property], sensor, thing)
 
 	thing.datastreams()
 	
 	# Import new segment as location
 	if segment_id not in sensorThings_segmentIDs:
-		location = Location(
+		location = sensorThings_entities.Location(
 			segment_id, 
 			name = TELRAAM_ENTITIES["Locations"]["name"],
 			description = TELRAAM_ENTITIES["Locations"]["description"],
@@ -124,14 +124,14 @@ def import_new_telraam_instance(instance, things, sensors, observed_properties, 
 		
 	# Link existing location to new thing
 	else:
-		location = Location(segment_id)
+		location = sensorThings_entities.Location(segment_id)
 		location.link_to_things([{"@iot.id": thing.iot_id()}])
 		location.update_self()
 
 	return things
 
 def sync(things, sensors, observed_properties):
-	print(f"\n ########## Start Telraam synchronization ##########\n")
+	LOGGER.log.info(f"########## Start Telraam synchronization ##########")
 	
 	time_start = time.strftime('%Y-%m-%d %H:%M:%SZ', time.gmtime(time.time() - 60*60*2))
 	time_end = time.strftime('%Y-%m-%d %H:%M:%SZ', time.gmtime())
@@ -150,9 +150,8 @@ def sync(things, sensors, observed_properties):
 
 	number_new_instances = len([instance for instance in telraam_instances_berlin if instance['instance_id'] not in sensorThings_instanceIDs])
 
-	print(f"\nsync -> start synchronization now")
-	print(f"sync   -> found {len(telraam_segments_berlin)} segments, {len(telraam_instances_berlin)} instances")
-	print(f"sync   -> found {len(sensorThings_segmentIDs)} Locations, {len(sensorThings_instanceIDs)} Things\n")
+	LOGGER.log.info(f"sync   -> found {len(telraam_segments_berlin)} segments, {len(telraam_instances_berlin)} instances")
+	LOGGER.log.info(f"sync   -> found {len(sensorThings_segmentIDs)} Locations, {len(sensorThings_instanceIDs)} Things\n")
 	
 	# Delete entities from sensorThings if not present in the Telraam data anymore
 	delete_outdated_entities("Locations", telraam_segmentIDs_berlin, sensorThings_segmentIDs)
@@ -166,7 +165,7 @@ def sync(things, sensors, observed_properties):
 			#instance['instance_id'] += 90000
 			instance_id = instance['instance_id']
 
-			print(f"### Start synchronization for >>{instance['status']}<< instance({instance_id}) ###")
+			LOGGER.log.info(f"### Start synchronization for >>{instance['status']}<< instance({instance_id}) ###")
 
 			if not instance_id in sensorThings_instanceIDs:	
 				things = import_new_telraam_instance(instance, things, sensors, observed_properties, sensorThings_segmentIDs, telraam_segments_berlin)
@@ -188,22 +187,24 @@ def sync(things, sensors, observed_properties):
 					telraam_traffic_data = telraam_traffic_query_result["result"].json()["report"][0]
 					result = telraam_traffic_data[datastream["unitOfMeasurement"]["name"]]
 					date = telraam_traffic_data["date"]
-					observation = Observation(result, date, datastream["@iot.id"])
+					observation = sensorThings_entities.Observation(result, date, datastream["@iot.id"])
 				else:
 					if instance["status"] == "active" and len(telraam_traffic_query_result["result"].json()["report"]) == 0:
-						print(f"ERROR -> sync@instance_id({instance['instance_id']}): empty query result for active instance")
+						LOGGER.err.warning(f"sync@instance_id({instance['instance_id']}): empty query result for active instance \n")
 						break
 					inactive_count += 1/len(things[instance_id].datastreams())
-					observation = Observation(instance["status"], None, datastream["@iot.id"])
+					observation = sensorThings_entities.Observation(instance["status"], None, datastream["@iot.id"])
+
+			LOGGER.log.info(f"### Finished synchronization for >>{instance['status']}<< instance({instance_id}) ### \n")
 
 		except RuntimeError as err:
-			print(f"ERROR -> sync@instance_id({instance['instance_id']}): {err}")
-			print("sync -> exit")
+			LOGGER.err.error(f"sync@instance_id({instance['instance_id']}): {err}")
+			LOGGER.err.error("sync -> exit \n")
 			exit()
 
-	print(f"\nsync -> imported {number_new_instances} new instances")
-	print(f"sync -> updated observations for {round(update_count)} instances ({round(inactive_count)} not active)")
-	print("sync -> done")
+	LOGGER.log.info(f"sync -> imported {number_new_instances} new instances")
+	LOGGER.log.info(f"sync -> updated observations for {round(update_count)} instances ({round(inactive_count)} not active)")
+	LOGGER.log.info("sync -> done \n")
 
 def init():
 
@@ -213,16 +214,16 @@ def init():
 	for thing in things_query_result.json()["value"]:
 		if "instance_id" in thing["properties"]:			
 			instance_id = thing["properties"]["instance_id"]
-			things[instance_id] = Thing(instance_id)
+			things[instance_id] = sensorThings_entities.Thing(instance_id)
 
 	# Get and/or add Sensors
 	sensors = {}
 	for sensor in TELRAAM_ENTITIES["Sensors"]:
-		sensors[sensor] = Sensor(TELRAAM_ENTITIES["Sensors"][sensor])
+		sensors[sensor] = sensorThings_entities.Sensor(TELRAAM_ENTITIES["Sensors"][sensor])
 
 	# Get and/or add ObservedProperties
 	observed_properties = {}
 	for observed_property in TELRAAM_ENTITIES["ObservedProperties"].values():
-		observed_properties[observed_property["name"]] = ObservedProperty(observed_property)
+		observed_properties[observed_property["name"]] = sensorThings_entities.ObservedProperty(observed_property)
 
 	return {"things": things, "sensors": sensors, "observed_properties": observed_properties}
