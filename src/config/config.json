@@ -3,7 +3,7 @@
 	"telraam_base_location": "https://telraam-api.net/v1",
 	"sync_timer_in_seconds.depricated": 3600,
 	"telraam_key_header": {
-		"X-Api-Key": "dqjoL0N6rCCQNAVuJqGi5hiIKWGYiNT1fZWWd7C8",
+		"X-Api-Key": "<API-KEY>",
 		"Content-Type": "application/json"
 	},
 	"telraam_traffic_snapshot": {
