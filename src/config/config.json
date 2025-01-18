@@ -17,5 +17,6 @@
   		"datefmt": "%Y-%m-%d %H:%M:%S",
   		"path": "logs/"
 	},
-	"sync_blume": false
+	"sync_blume": true,
+	"sync_telraam": false
 }
