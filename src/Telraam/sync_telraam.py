@@ -10,7 +10,7 @@ LOGGER = logger.log
 with open("config/config.json", mode="r", encoding="utf-8") as read_file:
 	CONFIG = json.load(read_file)
 
-with open("config/telraam_entities.json", mode="r", encoding="utf-8") as read_file:
+with open("Telraam/telraam_entities.json", mode="r", encoding="utf-8") as read_file:
 	TELRAAM_ENTITIES = json.load(read_file)
 
 def get_sensorThings_entitiy_IDs(entity, id_filter):
@@ -78,9 +78,6 @@ def import_new_telraam_instance(instance, things, sensors, observed_properties, 
 	segment_id = instance['segment_id']
 
 	LOGGER.log.info(f"\nsync@instance_id({instance_id}) -> found new instance({instance_id}) with segment_id({segment_id}))")
-
-	with open("config/telraam_entities.json", mode="r", encoding="utf-8") as read_file:
-		TELRAAM_ENTITIES = json.load(read_file)
 
 	things[instance_id] = sensorThings_entities.Thing(
 		instance_id, 
@@ -226,4 +223,11 @@ def init():
 	for observed_property in TELRAAM_ENTITIES["ObservedProperties"].values():
 		observed_properties[observed_property["name"]] = sensorThings_entities.ObservedProperty(observed_property)
 
-	return {"things": things, "sensors": sensors, "observed_properties": observed_properties}
+	while True:
+		if time.localtime().tm_min == 50:
+			if time.localtime().tm_hour > 7 and time.localtime().tm_hour < 18:
+				sync(things, sensors, observed_properties)
+			else:
+				LOGGER.log.info("main@telraam.sync -> waiting for the sun to rise") 
+			time.sleep(10*60)
+		time.sleep(abs(2999 - time.localtime().tm_min*60))

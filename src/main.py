@@ -1,14 +1,13 @@
 import requests
 import json
-import time
-import BLUME.init_blume as blume
-import Telraam.init_telraam as telraam
+import importlib
 import logger
-
-LOGGER = logger.log
 
 with open("config/config.json", mode="r", encoding="utf-8") as read_file:
 	CONFIG = json.load(read_file)
+
+LOGGER = logger.log
+SYNC = importlib.import_module(f"{CONFIG['sync_module']}")
 
 def check_sensorThings_connection():
 	try: 
@@ -29,23 +28,4 @@ if __name__ == "__main__":
 	LOGGER.log.info("Initiate SensorThings API synchronization")
 	LOGGER.log.info("##########################################\n")
 
-	telraam_initialization = telraam.init()
-
-	if CONFIG["sync_blume"]:
-		blume_initialization = blume.init()
-
-	while True:
-		if time.localtime().tm_min == 50:
-			if time.localtime().tm_hour > 7 and time.localtime().tm_hour < 18:
-				telraam.sync(
-					telraam_initialization["things"], 
-					telraam_initialization["sensors"], 
-					telraam_initialization["observed_properties"]
-					)
-			else:
-				LOGGER.log.info("main@telraam.sync -> waiting for the sun to rise") 
-			if CONFIG["sync_blume"]:
-				blume.sync(blume_initialization)
-			time.sleep(3000)
-		else:
-			time.sleep(55)
+	SYNC.init()
