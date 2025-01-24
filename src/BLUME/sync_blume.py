@@ -82,9 +82,8 @@ def sync(things, sensor):
 	details = {}
 
 	for station in stations.json():
-		LOGGER.log.info(f"### Start synchronization for >>{'active' if station['active'] else 'inactive'}<< station({station['name']}) ###")
-
 		if station["active"]:
+			LOGGER.log.info(f"### Start synchronization for >>{'active' if station['active'] else 'inactive'}<< station({station['name']}) ###")
 			update_count += 1
 
 			# Import BLUME thing and location if not exists
@@ -131,7 +130,7 @@ def sync(things, sensor):
 					datastream_iot_id
 					)
 			
-		LOGGER.log.info(f"### Finished synchronization for >>{'active' if station['active'] else 'inactive'}<< station({station['name']}) ### \n")
+			LOGGER.log.info(f"### Finished synchronization for >>{'active' if station['active'] else 'inactive'}<< station({station['name']}) ### \n")
 
 	LOGGER.log.info(f"sync -> updated observations for {update_count} BLUME stations")
 
@@ -143,4 +142,8 @@ def init():
 	for allocator in res.json()["value"]:
 		things[allocator["properties"]["unique_allocator"]] = sensorThings_entities.Thing(allocator["properties"]["unique_allocator"])
 
-	return {"things": things, "sensor": sensor}
+	while True:
+		if time.localtime().tm_min == 50:
+			sync(things, sensor)
+			time.sleep(10*60)
+		time.sleep(abs(2999 - time.localtime().tm_min*60))

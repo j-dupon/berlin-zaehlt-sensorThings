@@ -1,7 +1,6 @@
 {
 	"sensorThings_base_location": "http://localhost:8080/FROST-Server/v1.1",
 	"telraam_base_location": "https://telraam-api.net/v1",
-	"sync_timer_in_seconds.depricated": 3600,
 	"telraam_key_header": {
 		"X-Api-Key": "<API-KEY>",
 		"Content-Type": "application/json"
@@ -17,6 +16,6 @@
   		"datefmt": "%Y-%m-%d %H:%M:%S",
   		"path": "logs/"
 	},
-	"sync_blume": true,
-	"sync_telraam": false
+	"sync_module.disabled": "BLUME.sync_blume",
+	"sync_module": "Telraam.sync_telraam"
 }
