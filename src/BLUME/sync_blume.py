@@ -30,7 +30,7 @@ def import_Location(station):
 		properties = {},
 		location = {
 			"type":  "Point",
-			"coordinates":  [station["lng"], station["lat"]]
+			"coordinates":  [float(station["lng"]), float(station["lat"])]
 			},
 		Things = []
 		)
