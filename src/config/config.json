@@ -6,7 +6,7 @@
 	"telraam_traffic_snapshot": {
 		"time": "live",
 		"contents": "minimal",
-		"berlin_area":"13.398872, 52.511014, 23"
+		"berlin_area":"13.398872, 52.511014, 2"
 	},
 	"logging": {
   		"format": "{asctime} - {levelname}: {message}",

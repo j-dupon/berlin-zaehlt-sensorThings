@@ -20,8 +20,11 @@ class Logger():
     error_logger = logging.getLogger("error")
     self.err = self.setup_logger(error_logger, f'{CONFIG["logging"]["path"]}err.log', logging.WARNING)
 
+    debug_logger = logging.getLogger("debug")
+    self.debug = self.setup_logger(debug_logger, f'{CONFIG["logging"]["path"]}debug.log', logging.DEBUG)
+
     default_logger = logging.getLogger(__name__)
-    self.log = self.setup_logger(default_logger, f'{CONFIG["logging"]["path"]}info.log', logging.DEBUG)
+    self.log = self.setup_logger(default_logger, f'{CONFIG["logging"]["path"]}info.log', logging.INFO)
 
   def setup_logger(self, logger, log_file, level):
     handler = logging.FileHandler(log_file)        

@@ -15,7 +15,7 @@ class Entity():
     import_result = requests.post(f"{CONFIG['sensorThings_base_location']}/{entity_name.replace('y', 'ie')}s", data = self.import_json())
     if import_result.ok:
       entity = requests.get(import_result.headers["Location"])
-      self.logger.log.debug(f"{entity_name}@iot.id({entity.json()['@iot.id']}) -> imported new {entity_name}: {entity.json()}")
+      self.logger.debug.debug(f"{entity_name}@iot.id({entity.json()['@iot.id']}) -> imported new {entity_name}: {entity.json()}")
       return entity.json()["@iot.id"]
     else:
       self.logger.err.error(f"{entity_name.replace('y', 'ie')}s({self.unique_allocator}) - headers: {import_result.headers} message: {import_result.json()['message']}")
