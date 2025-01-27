@@ -20,7 +20,7 @@ sudo docker compose up
 ```
 
 1. Die URL der SensorThingsAPI (FROST-Server) muss in `src/config/config.json` im Feld `sensorThings_base_location` gesetzt werden (Default von FROST: `http://localhost:8080/FROST-Server/v1.1`)
-2. Die Telraam API benötigt einen X-API-Key zur Autorisierung. Diesen ebenfalls in der Konfigurationsdatei im Feld `telraam_key_header.X-Api-Key` hinterlegen.
+2. Die Telraam API benötigt einen X-API-Key zur Autorisierung. Diesen ebenfalls in der Konfigurationsdatei im Feld `telraam_key_header.X-Api-Key` hinterlegen. Es kann zusätzlich ein fallback-key angegeben werden, für den Fall, dass die maximale Anzahl an Abfragen an die Telraam-API für den X-Api-Key erreicht wird.
 3. Dann kann zum Starten des Service `python3 main.py` im Ordner `src` ausgeführt werden. Alternativ kann die Synchronisation mit `python3 -m Telraam.trigger_telraam_sync` im Ordner `src` einmalig ausgeführt werden.
 4. Jeweils 10 Minuten vor einer vollen Stunde synchronisiert der Service die Telraam Daten.
 
