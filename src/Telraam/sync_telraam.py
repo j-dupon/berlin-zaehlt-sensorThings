@@ -124,7 +124,7 @@ def import_telraam(instance, sensors, observed_properties, telraam_segments_berl
 	return thing
 
 def sync(sensors, observed_properties):
-	LOGGER.log.info(f"########## Start Telraam synchronization ##########")
+	LOGGER.debug.debug(f"########## Start Telraam synchronization ##########")
 	
 	time_start = time.strftime('%Y-%m-%d %H:%M:%SZ', time.gmtime(time.time() - 60*60*2))
 	time_end = time.strftime('%Y-%m-%d %H:%M:%SZ', time.gmtime())
@@ -181,7 +181,7 @@ def sync(sensors, observed_properties):
 					inactive_count += 1/len(things[instance_id].datastreams())
 					sensorThings_entities.Observation(instance["status"], None, datastream["@iot.id"])
 
-			LOGGER.log.info(f"### Finished synchronization for >>{instance['status']}<< instance({instance_id}) ### \n")
+			LOGGER.debug.debug(f"### Finished synchronization for >>{instance['status']}<< instance({instance_id}) ### \n")
 
 		except RuntimeError as err:
 			LOGGER.err.error(f"sync@instance_id({instance['instance_id']}): {err}")

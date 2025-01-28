@@ -83,7 +83,7 @@ def sync(things, sensor):
 
 	for station in stations.json():
 		if station["active"]:
-			LOGGER.log.info(f"### Start synchronization for >>{'active' if station['active'] else 'inactive'}<< station({station['name']}) ###")
+			LOGGER.debug.debug(f"### Start synchronization for >>{'active' if station['active'] else 'inactive'}<< station({station['name']}) ###")
 			update_count += 1
 
 			# Import BLUME thing and location if not exists
@@ -130,7 +130,7 @@ def sync(things, sensor):
 					datastream_iot_id
 					)
 			
-			LOGGER.log.info(f"### Finished synchronization for >>{'active' if station['active'] else 'inactive'}<< station({station['name']}) ### \n")
+			LOGGER.debug.debug(f"### Finished synchronization for >>{'active' if station['active'] else 'inactive'}<< station({station['name']}) ### \n")
 
 	LOGGER.log.info(f"sync -> updated observations for {update_count} BLUME stations")
 
