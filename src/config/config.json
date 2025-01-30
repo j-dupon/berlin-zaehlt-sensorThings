@@ -1,10 +1,8 @@
 {
 	"sensorThings_base_location": "http://localhost:8080/FROST-Server/v1.1",
 	"telraam_base_location": "https://telraam-api.net/v1",
-	"telraam_key_header": {
-		"X-Api-Key": "<API-KEY>",
-		"Content-Type": "application/json"
-	},
+	"telraam_api_key": "X-API-Key",
+	"telraam_api_key_fallback": "X-API-Key Fallback",
 	"telraam_traffic_snapshot": {
 		"time": "live",
 		"contents": "minimal",

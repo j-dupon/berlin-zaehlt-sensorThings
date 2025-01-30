@@ -27,14 +27,6 @@ if __name__ == "__main__":
 		LOGGER.err.error("ERROR -> sync: not connected to sensorThingsAPI")
 		exit()
 
-	# Get things
-	things = {}
-	things_query_result = requests.get(f"{CONFIG['sensorThings_base_location']}/Things")
-	for thing in things_query_result.json()["value"]:
-		if "instance_id" in thing["properties"]:			
-			instance_id = thing["properties"]["instance_id"]
-			things[instance_id] = sensorThings_entities.Thing(instance_id)
-
 	# Get and/or add Sensors
 	sensors = {}
 	for sensor in TELRAAM_ENTITIES["Sensors"]:
@@ -45,4 +37,4 @@ if __name__ == "__main__":
 	for observed_property in TELRAAM_ENTITIES["ObservedProperties"].values():
 		observed_properties[observed_property["name"]] = sensorThings_entities.ObservedProperty(observed_property)	
 
-	telraam.sync(things, sensors, observed_properties)
+	telraam.sync(sensors, observed_properties)

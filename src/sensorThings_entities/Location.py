@@ -46,7 +46,7 @@ class Location(Entity):
 
     if update_result.ok:
       location = requests.get(f"{CONFIG['sensorThings_base_location']}/Locations({iot_id})")
-      self.logger.log.debug(f"Location@iot.id({iot_id}) -> success - updated Location({self.unique_allocator}) for Thing(s)({self.Things}), Location: {location.json()}")
+      self.logger.debug.debug(f"Location@iot.id({iot_id}) -> success - updated Location({self.unique_allocator}) for Thing(s)({self.Things}), Location: {location.json()}")
       return iot_id
     else:
       self.logger.err.error(f"Location@iot.id({iot_id}): {update_result.json()}")
