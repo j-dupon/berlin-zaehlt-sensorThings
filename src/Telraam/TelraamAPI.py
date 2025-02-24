@@ -49,25 +49,33 @@ class TelraamAPI:
 		url = f"{self.base_url}/segments/id/{segment_id}"
 		return self.telraam_get(url)
 	
-	def swap_api_key(self):
-		self.request_counter = 0
+	def swap_api_key(self, request_method, url, body):
 		LOGGER.err.warning(f"swapped the X-Api-Key after {self.request_counter} requests")
+		self.request_counter = 0
 		if self.api_key_header["X-Api-Key"] == self.api_key:
 			self.api_key_header["X-Api-Key"] = self.api_key_fallback
 		else:
 			self.api_key_header["X-Api-Key"] = self.api_key
+
+		if request_method == "get":
+			return requests.get(url, headers = self.api_key_header)
+
+		if request_method == "post":
+			return requests.post(url, data = body, headers = self.api_key_header)
+		
+		return {"status_code": 1000, "error_message": "Unknown error: attempting to swap API-Keys failed"}
 
 
 	def telraam_get(self, url):
 		try:
 			res = requests.get(url, headers = self.api_key_header)
 			if res.status_code > 200:
-				self.swap_api_key(self)
-				return {"ok": 0, "error_message": res.json()}
+				res = self.swap_api_key("get", url, None)
+				if res.status_code > 200:
+					return {"ok": 0, "error_message": res.json()}
 			self.request_counter += 1
 			return {"ok": 1, "result": res}
 		except RuntimeError as err:
-			self.swap_api_key(self)
 			LOGGER.err.error(f"ERROR -> telraam_get: {err}")
 			return {"ok": 0, "error_message": err}
 
@@ -76,11 +84,11 @@ class TelraamAPI:
 		try:
 			res = requests.post(url, data = json.dumps(body), headers = self.api_key_header)
 			if res.status_code > 200:
-				self.swap_api_key(self)
-				return {"ok": 0, "error_message": res.json()}
+				res = self.swap_api_key("post", url, json.dumps(body))
+				if res.status_code > 200:
+					return {"ok": 0, "error_message": res.json()}
 			self.request_counter += 1
 			return {"ok": 1, "result": res}
 		except RuntimeError as err:
-			self.swap_api_key(self)
 			LOGGER.err.error(f"ERROR -> telraam_post: {err}")
 			return {"ok": 0, "error_message": err}

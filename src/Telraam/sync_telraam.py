@@ -77,7 +77,7 @@ def import_telraam(instance, sensors, observed_properties, telraam_segments_berl
 	instance_id = instance['instance_id']  
 	segment_id = instance['segment_id']
 
-	LOGGER.log.info(f"\nsync@instance_id({instance_id}) -> found new instance({instance_id}) with segment_id({segment_id}))")
+	LOGGER.log.info(f"sync@instance_id({instance_id}) -> found new instance({instance_id}) with segment_id({segment_id}))")
 
 	thing = sensorThings_entities.Thing(
 		instance_id, 
@@ -124,7 +124,7 @@ def import_telraam(instance, sensors, observed_properties, telraam_segments_berl
 	return thing
 
 def sync(sensors, observed_properties):
-	LOGGER.debug.debug(f"########## Start Telraam synchronization ##########")
+	LOGGER.log.info(f"########## Start Telraam synchronization ##########")
 	
 	time_start = time.strftime('%Y-%m-%d %H:%M:%SZ', time.gmtime(time.time() - 60*60*2))
 	time_end = time.strftime('%Y-%m-%d %H:%M:%SZ', time.gmtime())
@@ -138,8 +138,8 @@ def sync(sensors, observed_properties):
 
 	number_new_instances = len([instance for instance in telraam_instances_berlin if instance['instance_id'] not in things])
 
-	LOGGER.log.info(f"sync   -> found {len(telraam_segments_berlin)} segments, {len(telraam_instances_berlin)} instances")
-	LOGGER.log.info(f"sync   -> found {len(locations)} Locations, {len(things)} Things\n")
+	LOGGER.log.info(f"sync -> found {len(telraam_segments_berlin)} segments, {len(telraam_instances_berlin)} instances")
+	LOGGER.log.info(f"sync -> found {len(locations)} Locations, {len(things)} Things\n")
 	
 	# Archive entities from sensorThings if not present in the Telraam data anymore
 	archive_outdated_entities(things, "instance_id", telraam_instances_berlin)
@@ -151,10 +151,14 @@ def sync(sensors, observed_properties):
 	for instance in telraam_instances_berlin:
 		try:
 			instance_id = instance['instance_id']
-			LOGGER.log.info(f"### Start synchronization for >>{instance['status']}<< instance({instance_id}) ###")
+			LOGGER.debug.debug(f"### Start synchronization for >>{instance['status']}<< instance({instance_id}) ###")
 
 			if not instance_id in things:	
 				things[instance_id] = import_telraam(instance, sensors, observed_properties, telraam_segments_berlin)
+
+			if instance["status"] != things[instance_id].properties["status"]:
+				things[instance_id].properties["status"] = instance["status"] 
+				things[instance_id].update_self()
 
 			if instance["status"] == "active":
 				time.sleep(2)
@@ -165,6 +169,12 @@ def sync(sensors, observed_properties):
 					"time_start": time_start,
 					"time_end": time_end
 				})
+				if not telraam_traffic_query_result["ok"]:
+					LOGGER.debug.debug(f"Skip >>{instance['status']}<< instance({instance_id}) ###")
+					LOGGER.debug.debug(f"Message: {telraam_traffic_query_result['error_message']}")
+					continue
+			else:
+				inactive_count += 1/len(things[instance_id].datastreams())
 
 			# Update Observations
 			for datastream in things[instance_id].datastreams():
@@ -176,7 +186,7 @@ def sync(sensors, observed_properties):
 					sensorThings_entities.Observation(result, date, datastream["@iot.id"])
 				else:
 					if instance["status"] == "active" and len(telraam_traffic_query_result["result"].json()["report"]) == 0:
-						LOGGER.err.warning(f"sync@instance_id({instance['instance_id']}): empty query result for active instance \n")
+						LOGGER.err.warning(f"sync@instance_id({instance['instance_id']}): empty query result for active instance")
 						break
 					inactive_count += 1/len(things[instance_id].datastreams())
 					sensorThings_entities.Observation(instance["status"], None, datastream["@iot.id"])
@@ -206,10 +216,10 @@ def init():
 		observed_properties[observed_property["name"]] = sensorThings_entities.ObservedProperty(observed_property)
 
 	while True:
-		if time.localtime().tm_min == 50:
-			if time.localtime().tm_hour >= berlin_daytime("sunrise") and time.localtime().tm_hour <= berlin_daytime("sunset"):
+		if time.localtime().tm_min == 40:
+			if time.localtime().tm_hour >= berlin_daytime("sunrise") and time.localtime().tm_hour <= berlin_daytime("sunset")+2:
 				sync(sensors, observed_properties)
 			else:
 				LOGGER.log.info("main@telraam.sync -> waiting for the sun to rise") 
-			time.sleep(10*60)
-		time.sleep(abs(2999 - time.localtime().tm_min*60))
+			time.sleep(20*60)
+		time.sleep(abs(2399 - time.localtime().tm_min*60))
