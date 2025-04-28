@@ -23,10 +23,12 @@ class Entity():
 
   def iot_id(self):
     entites_from_result = requests.get(f"{CONFIG['sensorThings_base_location']}/{self.iot_id_request_url}")
+    if len(entites_from_result.json()["value"]) == 0:
+      return self.import_self()
     if len(entites_from_result.json()["value"]) == 1:
       return entites_from_result.json()["value"][0]["@iot.id"]
-    else:
-      return self.import_self()
+    self.logger.err.error(f"{self.entity_name}@unique_allocator({self.unique_allocator}): {entites_from_result.json()}")
+    return -1
     
   def update_self(self):
     iot_id = self.iot_id()
