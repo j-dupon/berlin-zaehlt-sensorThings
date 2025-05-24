@@ -69,11 +69,11 @@ class TelraamAPI:
 	def telraam_get(self, url):
 		try:
 			res = requests.get(url, headers = self.api_key_header)
+			if res.status_code == 429:
+				res = self.swap_api_key("get", url, None)
 			if res.status_code > 200:
 				LOGGER.debug.debug(f"telraam_get@TelraamAPI: request returned {res.status_code} - {res.json()}")
-				res = self.swap_api_key("get", url, None)
-				if res.status_code > 200:
-					return {"ok": 0, "error_message": res.json()}
+				return {"ok": 0, "error_message": res.json()}
 			self.request_counter += 1
 			return {"ok": 1, "result": res}
 		
@@ -84,11 +84,11 @@ class TelraamAPI:
 	def telraam_post(self, url, body):
 		try:
 			res = requests.post(url, data = json.dumps(body), headers = self.api_key_header)
+			if res.status_code == 429:
+				res = self.swap_api_key("post", url, json.dumps(body))
 			if res.status_code > 200:
 				LOGGER.debug.debug(f"telraam_post@TelraamAPI: request returned {res.status_code} - {res.json()}")
-				res = self.swap_api_key("post", url, json.dumps(body))
-				if res.status_code > 200:
-					return {"ok": 0, "error_message": res.json()}
+				return {"ok": 0, "error_message": res.json()}
 			self.request_counter += 1
 			return {"ok": 1, "result": res}
 		
