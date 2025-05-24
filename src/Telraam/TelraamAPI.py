@@ -6,15 +6,15 @@ LOGGER = logger.log
 
 class TelraamAPI:
 
-	def __init__(self, api_key, api_key_fallback, base_url):
-		self.api_key = api_key
-		self.api_key_fallback = api_key_fallback
+	def __init__(self, api_keys, base_url):
+		self.api_keys = api_keys
 		self.api_key_header = {
-			"X-Api-Key": self.api_key,
+			"X-Api-Key": self.api_keys[0],
 			"Content-Type": "application/json"
 			}
 		self.base_url = base_url
 		self.request_counter = 0
+		self.swap_key_counter = 0
 
 	def get_traffic_snapshot(self, settings):
 		url = f"{self.base_url}/reports/traffic_snapshot"
@@ -50,45 +50,48 @@ class TelraamAPI:
 		return self.telraam_get(url)
 	
 	def swap_api_key(self, request_method, url, body):
-		LOGGER.err.warning(f"swapped the X-Api-Key after {self.request_counter} requests")
+		LOGGER.log.info(f"swap_api_key@TelraamAPI: swapped X-Api-Key after {self.request_counter} requests")
 		self.request_counter = 0
-		if self.api_key_header["X-Api-Key"] == self.api_key:
-			self.api_key_header["X-Api-Key"] = self.api_key_fallback
-		else:
-			self.api_key_header["X-Api-Key"] = self.api_key
+		self.swap_key_counter += 1
 
+		self.api_key_header["X-Api-Key"] = self.api_keys[self.swap_api_key%3]
+
+		# Repeat a failed GET request
 		if request_method == "get":
 			return requests.get(url, headers = self.api_key_header)
 
+		# Repeat a failed POST request
 		if request_method == "post":
 			return requests.post(url, data = body, headers = self.api_key_header)
 		
 		return {"status_code": 1000, "error_message": "Unknown error: attempting to swap API-Keys failed"}
 
-
 	def telraam_get(self, url):
 		try:
 			res = requests.get(url, headers = self.api_key_header)
 			if res.status_code > 200:
+				LOGGER.debug.debug(f"telraam_get@TelraamAPI: request returned {res.status_code} - {res.json()}")
 				res = self.swap_api_key("get", url, None)
 				if res.status_code > 200:
 					return {"ok": 0, "error_message": res.json()}
 			self.request_counter += 1
 			return {"ok": 1, "result": res}
+		
 		except RuntimeError as err:
 			LOGGER.err.error(f"ERROR -> telraam_get: {err}")
 			return {"ok": 0, "error_message": err}
 
 	def telraam_post(self, url, body):
-		self.request_counter += 1
 		try:
 			res = requests.post(url, data = json.dumps(body), headers = self.api_key_header)
 			if res.status_code > 200:
+				LOGGER.debug.debug(f"telraam_post@TelraamAPI: request returned {res.status_code} - {res.json()}")
 				res = self.swap_api_key("post", url, json.dumps(body))
 				if res.status_code > 200:
 					return {"ok": 0, "error_message": res.json()}
 			self.request_counter += 1
 			return {"ok": 1, "result": res}
+		
 		except RuntimeError as err:
 			LOGGER.err.error(f"ERROR -> telraam_post: {err}")
 			return {"ok": 0, "error_message": err}

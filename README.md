@@ -10,6 +10,7 @@ Dieses Projekt hat zum Ziel, die in Berlin erhobenen Telraam-Daten in eine Senso
 
 - Teck-Stack: Python, SensorThings API (FROST-Server)
 	- FROST-Server: https://fraunhoferiosb.github.io/FROST-Server/deployment/docker.html
+	- Python: Es wird die Bibliothek 'requests' benötigt
 
 Hinweis: Dieser Quick Start Guide wurde auf Debian GNU/Linux 11 (bullseye) getestet
 
@@ -20,11 +21,11 @@ sudo docker compose up
 ```
 
 1. Die URL der SensorThingsAPI (FROST-Server-Konfiguration) muss in `src/config/config.json` im Feld `sensorThings_base_location` gesetzt werden.
-2. Die Telraam-API benötigt einen X-API-Key zur Autorisierung. Diesen ebenfalls in der Konfigurationsdatei im Feld `telraam_key_header.X-Api-Key` hinterlegen. Es kann zusätzlich ein fallback-key angegeben werden, für den Fall, dass die maximale tägliche Anzahl an Abfragen an die Telraam-API für den X-Api-Key erreicht wird. Das ist in der Regel der Fall.
+2. Die Telraam-API benötigt drei X-API-Keys zur Autorisierung (https://faq.telraam.net/article/27/you-wish-more-data-and-statistics-using-the-telraam-api). Diese ebenfalls in der Konfigurationsdatei in den Feldern `telraam_key_header.X-Api-Key` hinterlegen.
 3. Zum Starten des Service wird `python3 main.py` im Ordner `src` ausgeführt. Alternativ kann die Synchronisation mit `python3 -m Telraam.trigger_telraam_sync` im Ordner `src` einmalig ausgeführt werden.
 4. Jeweils 20 Minuten vor einer vollen Stunde zwischen Sonnenaufgang und Sonnenuntergang synchronisiert der Service die Telraam-Daten.
 
-- `Logs` werden unter `src/logs` erstellt.
+`Logs` werden unter `src/logs` erstellt.
 #
 
 ```json
@@ -33,8 +34,11 @@ sudo docker compose up
 {
 	"sensorThings_base_location": "http://localhost:8080/FROST-Server/v1.1",
 	"telraam_base_location": "https://telraam-api.net/v1",
-	"telraam_api_key": "<X-API-Key>",
-	"telraam_api_key_fallback": "<X-API-Key Fallback>",
+	"telraam_api_keys": [
+		"X-API-Key 1",
+		"X-API-Key 2",
+		"X-API-Key 3"
+		],
 	"telraam_traffic_snapshot": {
 		"time": "live",
 		"contents": "minimal",

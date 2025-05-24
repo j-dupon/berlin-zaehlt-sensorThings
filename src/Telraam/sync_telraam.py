@@ -13,7 +13,7 @@ with open("Telraam/telraam_entities.json", mode="r", encoding="utf-8") as read_f
 	TELRAAM_ENTITIES = json.load(read_file)
 
 LOGGER = logger.log
-TELRAAM_API = TelraamAPI(CONFIG["telraam_api_key"], CONFIG["telraam_api_key_fallback"], CONFIG["telraam_base_location"])
+TELRAAM_API = TelraamAPI(CONFIG["telraam_api_keys"], CONFIG["telraam_base_location"])
 
 def get_sensorThings_entities(entity_name, id_filter):
 	count = requests.get(f"{CONFIG['sensorThings_base_location']}/{entity_name}?$count=true")
@@ -77,18 +77,6 @@ def import_telraam(instance, sensors, observed_properties, telraam_segments_berl
 			"status": instance["status"]
 			}
 		)
-
-	# Select the sensor
-	if instance["hardware_version"] == 1:
-		sensor = sensors["Telraam_V1"]
-	elif instance["hardware_version"] == 2:
-		sensor = sensors["Telraam_S2"]
-	else:
-		sensor = sensors["Unknown"]
-
-	# Import datastreams
-	for observed_property in observed_properties:
-		datastream = sensorThings_entities.Datastream(observed_properties[observed_property], sensor, thing)
 	
 	# Import new segment as location
 	if segment_id not in get_sensorThings_entities("Locations", "segment_id"):
@@ -107,6 +95,18 @@ def import_telraam(instance, sensors, observed_properties, telraam_segments_berl
 		location = sensorThings_entities.Location(segment_id)
 		location.link_to_things([{"@iot.id": thing.iot_id()}])
 		location.update_self()
+
+	# Select the sensor
+	if instance["hardware_version"] == 1:
+		sensor = sensors["Telraam_V1"]
+	elif instance["hardware_version"] == 2:
+		sensor = sensors["Telraam_S2"]
+	else:
+		sensor = sensors["Unknown"]
+
+	# Import datastreams
+	for observed_property in observed_properties:
+		datastream = sensorThings_entities.Datastream(observed_properties[observed_property], sensor, thing)
 
 	return thing
 
