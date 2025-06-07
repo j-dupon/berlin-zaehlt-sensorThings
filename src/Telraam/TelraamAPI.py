@@ -16,7 +16,7 @@ class TelraamAPI:
 		self.request_counter = 0
 		self.swap_key_counter = 0
 
-	def get_traffic_snapshot(self, settings):
+	def traffic_snapshot(self, settings):
 		url = f"{self.base_url}/reports/traffic_snapshot"
 		body = {
 			"time": settings["time"],
@@ -25,14 +25,10 @@ class TelraamAPI:
 		}	
 		return self.telraam_post(url, body)
 
-	def get_instances(self):
+	def instances(self):
 		return self.telraam_get(f"{self.base_url}/cameras")
 
-	def get_instance_by_id(self, segment_id):
-		url = f"{self.base_url}/cameras/segment/{segment_id}"
-		return self.telraam_get(url)
-
-	def get_traffic(self, settings):
+	def traffic(self, settings):
 		body = {
 		  "level": settings["level"],
 		  "format": settings["format"],
@@ -41,19 +37,11 @@ class TelraamAPI:
 		  "time_end": settings["time_end"]
 		}	
 		return self.telraam_post(f"{self.base_url}/reports/traffic", body)
-
-	def get_segments(self):
-		return self.telraam_get(f"{self.base_url}/segments/all")
-
-	def get_segment_by_id(self, segment_id):
-		url = f"{self.base_url}/segments/id/{segment_id}"
-		return self.telraam_get(url)
 	
 	def swap_api_key(self, request_method, url, body):
-		LOGGER.log.info(f"swap_api_key@TelraamAPI: swapped X-Api-Key after {self.request_counter} requests")
+		LOGGER.log.info(f"TelraamAPI@swap_api_key: swapped X-Api-Key after {self.request_counter} requests")
 		self.request_counter = 0
 		self.swap_key_counter += 1
-
 		self.api_key_header["X-Api-Key"] = self.api_keys[self.swap_api_key%3]
 
 		# Repeat a failed GET request
@@ -63,35 +51,36 @@ class TelraamAPI:
 		# Repeat a failed POST request
 		if request_method == "post":
 			return requests.post(url, data = body, headers = self.api_key_header)
-		
-		return {"status_code": 1000, "error_message": "Unknown error: attempting to swap API-Keys failed"}
+
+		LOGGER.err.error(f"TelraamAPI@telraam_post: Unknown error - attempting to swap API-Keys failed")
+		exit()
 
 	def telraam_get(self, url):
 		try:
 			res = requests.get(url, headers = self.api_key_header)
-			if res.status_code == 429:
+			if res.status_code == 429 or res.json()["status_code"] == 429:
 				res = self.swap_api_key("get", url, None)
-			if res.status_code > 200:
-				LOGGER.debug.debug(f"telraam_get@TelraamAPI: request returned {res.status_code} - {res.json()}")
+			if res.json()["status_code"] > 200 or "errorMessage" in res.json():
+				LOGGER.err.error(f"TelraamAPI@telraam_get: request returned {res.json()['status_code']} - {res.json()}")
 				return {"ok": 0, "error_message": res.json()}
 			self.request_counter += 1
 			return {"ok": 1, "result": res}
 		
 		except RuntimeError as err:
 			LOGGER.err.error(f"ERROR -> telraam_get: {err}")
-			return {"ok": 0, "error_message": err}
+			exit()
 
 	def telraam_post(self, url, body):
 		try:
 			res = requests.post(url, data = json.dumps(body), headers = self.api_key_header)
-			if res.status_code == 429:
+			if res.status_code == 429 or res.json()["status_code"] == 429:
 				res = self.swap_api_key("post", url, json.dumps(body))
-			if res.status_code > 200:
-				LOGGER.debug.debug(f"telraam_post@TelraamAPI: request returned {res.status_code} - {res.json()}")
+			if res.json()["status_code"] > 200 or "errorMessage" in res.json():
+				LOGGER.err.error(f"TelraamAPI@telraam_post: request returned {res.json()['status_code']} - {res.json()}")
 				return {"ok": 0, "error_message": res.json()}
 			self.request_counter += 1
 			return {"ok": 1, "result": res}
 		
 		except RuntimeError as err:
 			LOGGER.err.error(f"ERROR -> telraam_post: {err}")
-			return {"ok": 0, "error_message": err}
+			exit()
