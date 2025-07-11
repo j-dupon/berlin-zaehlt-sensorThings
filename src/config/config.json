@@ -1,12 +1,15 @@
 {
-	"sensorThings_base_location": "http://localhost:8080/FROST-Server/v1.1",
+	"sensorThings_base_location": "http://localhost:8090/FROST-Server/v1.1",
 	"telraam_base_location": "https://telraam-api.net/v1",
-	"telraam_api_key": "X-API-Key",
-	"telraam_api_key_fallback": "X-API-Key Fallback",
+	"telraam_api_keys": [
+		"X-API-Key 1",
+		"X-API-Key 2",
+		"X-API-Key 3"
+		],
 	"telraam_traffic_snapshot": {
 		"time": "live",
 		"contents": "minimal",
-		"berlin_area":"13.398872, 52.511014, 2"
+		"berlin_area":"13.398872, 52.511014, 3"
 	},
 	"logging": {
   		"format": "{asctime} - {levelname}: {message}",

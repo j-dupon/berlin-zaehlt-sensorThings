@@ -3,7 +3,7 @@ import json
 import time
 import sensorThings_entities
 from Telraam.TelraamAPI import TelraamAPI
-from Telraam.day_night_cycle import berlin_daytime
+#from Telraam.day_night_cycle import berlin_daytime
 import logger
 
 with open("config/config.json", mode="r", encoding="utf-8") as read_file:
@@ -13,9 +13,9 @@ with open("Telraam/telraam_entities.json", mode="r", encoding="utf-8") as read_f
 	TELRAAM_ENTITIES = json.load(read_file)
 
 LOGGER = logger.log
-TELRAAM_API = TelraamAPI(CONFIG["telraam_api_key"], CONFIG["telraam_api_key_fallback"], CONFIG["telraam_base_location"])
+TELRAAM_API = TelraamAPI(CONFIG["telraam_api_keys"], CONFIG["telraam_base_location"])
 
-def get_sensorThings_entities(entity_name, id_filter):
+def sensorThings_entities_from_api(entity_name, id_filter):
 	count = requests.get(f"{CONFIG['sensorThings_base_location']}/{entity_name}?$count=true")
 	query_top =  count.json()["@iot.count"]
 	query_filter = f"$filter=properties/{id_filter} ne ''"
@@ -29,30 +29,12 @@ def get_sensorThings_entities(entity_name, id_filter):
 			entities[entity['properties'][id_filter]] = sensorThings_entities.Location(entity["properties"]["unique_allocator"])
 	return entities
 
-def archive_outdated_entities(entites, entity_allocator, telraam_data):
-	telraam_data = [instance["instance_id"] for instance in telraam_data] if entity_allocator == "instance_id" else telraam_data
-	entity_name = "Things" if entity_allocator == "instance_id" else "Locations"
-
-	for entity in entites:
-		if entity not in telraam_data and not entites[entity].properties["deleted"]:
-			LOGGER.log.info(f"sync@outdated: archived {entity_allocator}({entity})")
-			requests.patch(
-				f"{CONFIG['sensorThings_base_location']}/{entity_name}({entites[entity].iot_id()})", 
-				data = json.dumps({
-					"properties": {
-						entity_allocator: f"_{entity}",
-						"unique_allocator": f"_{entity}",
-						"deleted": True
-					}})
-				)
-
-def get_telraam_data():
+def telraam_cameras_from_api():
 	
 	# Get a list of Telraam segments in Berlin
-	telraam_snapshots = TELRAAM_API.get_traffic_snapshot(CONFIG["telraam_traffic_snapshot"])
+	telraam_snapshots = TELRAAM_API.traffic_snapshot(CONFIG["telraam_traffic_snapshot"])
 	if not telraam_snapshots['ok']:
-		LOGGER.err.error(f"sync: {telraam_snapshots['error_message']}")
-		return 1
+		return {"ok": False}  
 
 	telraam_segments_berlin = {}
 	for snapshot in telraam_snapshots['result'].json()['features']:
@@ -60,15 +42,15 @@ def get_telraam_data():
 
 	# Get a list of all Telraam instances
 	time.sleep(2)
-	telraam_instances = TELRAAM_API.get_instances()
+	telraam_instances = TELRAAM_API.instances()
 	if not telraam_instances['ok']:
-		LOGGER.err.error(f"sync: {telraam_snapshots['error_message']}")
-		return 1
+		return {"ok": False}  
 
 	telraam_instances = telraam_instances['result'].json()['cameras']
 	telraam_instances_berlin = [instance for instance in telraam_instances if instance['segment_id'] in telraam_segments_berlin]
 
 	return{
+		"ok": True,
 		"telraam_segments_berlin": telraam_segments_berlin,
 		"telraam_instances_berlin": telraam_instances_berlin
 	}
@@ -77,7 +59,12 @@ def import_telraam(instance, sensors, observed_properties, telraam_segments_berl
 	instance_id = instance['instance_id']  
 	segment_id = instance['segment_id']
 
-	LOGGER.log.info(f"\nsync@instance_id({instance_id}) -> found new instance({instance_id}) with segment_id({segment_id}))")
+	LOGGER.log.info(f"sync@instance_id({instance_id}) -> found new instance({instance_id}) with segment_id({segment_id}))")
+
+	exists = requests.get(f"{CONFIG['sensorThings_base_location']}/Things?$filter=properties/unique_allocator eq {instance_id}")
+	if len(exists.json()['value']) > 0:
+		LOGGER.err.warning(f"sync@instance_id({instance_id}): stop! instance duplicate -> found {exists.json()['value']}")
+		return -1
 
 	thing = sensorThings_entities.Thing(
 		instance_id, 
@@ -86,10 +73,27 @@ def import_telraam(instance, sensors, observed_properties, telraam_segments_berl
 		properties = {
 			"instance_id": instance_id,
 			"segment_id": segment_id,
-			"status": instance["status"],
-			"deleted": False
+			"status": instance["status"]
 			}
 		)
+	
+	# Import new segment as location
+	if segment_id not in sensorThings_entities_from_api("Locations", "segment_id"):
+		location = sensorThings_entities.Location(
+			segment_id, 
+			name = TELRAAM_ENTITIES["Locations"]["name"],
+			description = TELRAAM_ENTITIES["Locations"]["description"],
+			encodingType = TELRAAM_ENTITIES["Locations"]["encodingType"],
+			location = telraam_segments_berlin[segment_id]['geometry'],  
+			Things = [{"@iot.id": thing.iot_id()}],
+			properties = {"segment_id": segment_id}
+			)
+		
+	# Link existing location to new thing
+	else:
+		location = sensorThings_entities.Location(segment_id)
+		location.link_to_things([{"@iot.id": thing.iot_id()}])
+		location.update_self()
 
 	# Select the sensor
 	if instance["hardware_version"] == 1:
@@ -102,48 +106,37 @@ def import_telraam(instance, sensors, observed_properties, telraam_segments_berl
 	# Import datastreams
 	for observed_property in observed_properties:
 		datastream = sensorThings_entities.Datastream(observed_properties[observed_property], sensor, thing)
-	
-	# Import new segment as location
-	if segment_id not in get_sensorThings_entities("Locations", "segment_id"):
-		location = sensorThings_entities.Location(
-			segment_id, 
-			name = TELRAAM_ENTITIES["Locations"]["name"],
-			description = TELRAAM_ENTITIES["Locations"]["description"],
-			encodingType = TELRAAM_ENTITIES["Locations"]["encodingType"],
-			location = telraam_segments_berlin[segment_id]['geometry'],  
-			Things = [{"@iot.id": thing.iot_id()}],
-			properties = {"segment_id": segment_id, "deleted": False}
-			)
-		
-	# Link existing location to new thing
-	else:
-		location = sensorThings_entities.Location(segment_id)
-		location.link_to_things([{"@iot.id": thing.iot_id()}])
-		location.update_self()
 
 	return thing
 
-def sync(sensors, observed_properties):
-	LOGGER.debug.debug(f"########## Start Telraam synchronization ##########")
+def sync(sensors, observed_properties, things, locations):
+	LOGGER.log.info(f"########## Start Telraam synchronization ##########")
 	
 	time_start = time.strftime('%Y-%m-%d %H:%M:%SZ', time.gmtime(time.time() - 60*60*2))
 	time_end = time.strftime('%Y-%m-%d %H:%M:%SZ', time.gmtime())
 
-	things = get_sensorThings_entities("Things", "instance_id")
-	locations = get_sensorThings_entities("Locations", "segment_id")
+	telraam_cameras = telraam_cameras_from_api()
 
-	telraam_data = get_telraam_data()
-	telraam_segments_berlin = telraam_data["telraam_segments_berlin"]
-	telraam_instances_berlin = telraam_data["telraam_instances_berlin"]
+	if not telraam_cameras["ok"]:
+		LOGGER.log.info(f"sync -> skip this synchronization due to an error with the Telraam-API")
+		LOGGER.log.info("sync -> done \n")
+		return things, locations
+	
+	telraam_segments_berlin = telraam_cameras["telraam_segments_berlin"]
+	telraam_instances_berlin = telraam_cameras["telraam_instances_berlin"]
 
 	number_new_instances = len([instance for instance in telraam_instances_berlin if instance['instance_id'] not in things])
 
-	LOGGER.log.info(f"sync   -> found {len(telraam_segments_berlin)} segments, {len(telraam_instances_berlin)} instances")
-	LOGGER.log.info(f"sync   -> found {len(locations)} Locations, {len(things)} Things\n")
-	
-	# Archive entities from sensorThings if not present in the Telraam data anymore
-	archive_outdated_entities(things, "instance_id", telraam_instances_berlin)
-	archive_outdated_entities(locations, "segment_id", telraam_segments_berlin)
+	LOGGER.log.info(f"sync -> found {len(telraam_segments_berlin)} segments, {len(telraam_instances_berlin)} instances")
+	LOGGER.log.info(f"sync -> found {len(locations)} Locations, {len(things)} Things\n")
+
+	# Update status to offline if the instance is not available
+	instanceIDs_berlin = [instance["instance_id"] for instance in telraam_instances_berlin]
+	for instance_id in things:
+		if instance_id not in instanceIDs_berlin and not things[instance_id].properties['status'] == 'offline':
+			LOGGER.log.info(f"sync@instance_id({instance_id}): offline")
+			things[instance_id].properties["status"] = 'offline'
+			things[instance_id].update_self()
 
 	# Update the sensorThings API
 	update_count = 0
@@ -151,20 +144,33 @@ def sync(sensors, observed_properties):
 	for instance in telraam_instances_berlin:
 		try:
 			instance_id = instance['instance_id']
-			LOGGER.log.info(f"### Start synchronization for >>{instance['status']}<< instance({instance_id}) ###")
+			LOGGER.debug.debug(f"### Start synchronization for >>{instance['status']}<< instance({instance_id}) ###")
 
 			if not instance_id in things:	
-				things[instance_id] = import_telraam(instance, sensors, observed_properties, telraam_segments_berlin)
+				new_thing = import_telraam(instance, sensors, observed_properties, telraam_segments_berlin)
+				if new_thing != -1:
+					things[instance_id] = new_thing
+
+			if instance["status"] != things[instance_id].properties["status"]:
+				LOGGER.log.info(f"sync@instance_id({instance_id}): changed status to {instance['status']}")
+				things[instance_id].properties["status"] = instance["status"] 
+				things[instance_id].update_self()
 
 			if instance["status"] == "active":
 				time.sleep(2)
-				telraam_traffic_query_result = TELRAAM_API.get_traffic({ 
+				telraam_traffic_query_result = TELRAAM_API.traffic({ 
 					"level": "instances",
 					"format": "per-hour",
 					"id": f"{instance_id}",
 					"time_start": time_start,
 					"time_end": time_end
 				})
+				if not telraam_traffic_query_result["ok"]:
+					LOGGER.debug.debug(f"Skip >>{instance['status']}<< instance({instance_id}) ###")
+					LOGGER.debug.debug(f"Message: {telraam_traffic_query_result['error_message']}")
+					continue
+			else:
+				inactive_count += 1/len(things[instance_id].datastreams())
 
 			# Update Observations
 			for datastream in things[instance_id].datastreams():
@@ -176,7 +182,7 @@ def sync(sensors, observed_properties):
 					sensorThings_entities.Observation(result, date, datastream["@iot.id"])
 				else:
 					if instance["status"] == "active" and len(telraam_traffic_query_result["result"].json()["report"]) == 0:
-						LOGGER.err.warning(f"sync@instance_id({instance['instance_id']}): empty query result for active instance \n")
+						LOGGER.debug.debug(f"sync@instance_id({instance['instance_id']}): empty query result for active instance")
 						break
 					inactive_count += 1/len(things[instance_id].datastreams())
 					sensorThings_entities.Observation(instance["status"], None, datastream["@iot.id"])
@@ -193,6 +199,8 @@ def sync(sensors, observed_properties):
 	LOGGER.log.info(f"sync -> updated observations for {round(update_count)} instances ({round(inactive_count)} not active)")
 	LOGGER.log.info("sync -> done \n")
 
+	return things, locations
+
 def init():
 
 	# Get and/or add Sensors
@@ -205,11 +213,11 @@ def init():
 	for observed_property in TELRAAM_ENTITIES["ObservedProperties"].values():
 		observed_properties[observed_property["name"]] = sensorThings_entities.ObservedProperty(observed_property)
 
+	things = sensorThings_entities_from_api("Things", "instance_id")
+	locations = sensorThings_entities_from_api("Locations", "segment_id")
+
 	while True:
-		if time.localtime().tm_min == 50:
-			if time.localtime().tm_hour >= berlin_daytime("sunrise") and time.localtime().tm_hour <= berlin_daytime("sunset"):
-				sync(sensors, observed_properties)
-			else:
-				LOGGER.log.info("main@telraam.sync -> waiting for the sun to rise") 
-			time.sleep(10*60)
-		time.sleep(abs(2999 - time.localtime().tm_min*60))
+		if time.localtime().tm_min == 40:
+			things, locations = sync(sensors, observed_properties, things, locations)
+			time.sleep(20*60)
+		time.sleep(abs(2399 - time.localtime().tm_min*60))

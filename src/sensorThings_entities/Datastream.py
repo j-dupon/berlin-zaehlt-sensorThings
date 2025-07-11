@@ -1,13 +1,11 @@
-import requests
-import json
-from .Entity import Entity
+from .Entity import *
 
 with open("config/config.json", mode="r", encoding="utf-8") as read_file:
   CONFIG = json.load(read_file)
 
 class Datastream(Entity):
 	def __init__(self, observed_property, sensor, thing):
-		super().__init__(f"Thing({thing.iot_id()}):{observed_property.name}")
+		super().__init__(f"Thing({thing.iot_id()}):{observed_property.name}/{sensor.name}")
 
 		self.name = f"{sensor.name}: {observed_property.name}"
 		self.description = observed_property.description
@@ -17,7 +15,7 @@ class Datastream(Entity):
 	    "name": observed_property.name,
 	    "symbol": observed_property.properties["symbol"],
 	    "definition": self.description
-	  }
+	  	}
 		self.ObservedProperty = {"@iot.id": observed_property.iot_id()}
 		self.Sensor = {"@iot.id": sensor.iot_id()}
 		self.Thing = {"@iot.id": thing.iot_id()}
