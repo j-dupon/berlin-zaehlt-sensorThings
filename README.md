@@ -1,5 +1,7 @@
 # Berlin zählt Mobilität: Überführung der Telraam-Daten in SensorThings API
 
+**`! Aktuell kann die Synchronisierung aufgrund eines Fehlers mit einem der Endpunkte der Telraam-API nicht korrekt ausgeführt werden !`**
+
 Dieses Projekt hat zum Ziel, die in Berlin erhobenen Telraam-Daten in eine SensorThings API zu überführen. SensorThings ist ein Standard des Open Geospacial Consortium (OGC).
 
 - Berlin zählt Mobilität: https://berlin.adfc.de/artikel/berlin-zaehlt-mobilitaet-adfc-berlin-dlr-rufen-zu-citizen-science-projekt-auf-1
