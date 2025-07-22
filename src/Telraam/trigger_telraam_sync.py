@@ -38,7 +38,7 @@ def check_sensorThings_connection():
 if __name__ == "__main__":
 
 	if not check_sensorThings_connection():
-		LOGGER.err.error("ERROR -> sync: not connected to sensorThingsAPI")
+		LOGGER.err.error("sync: not connected to sensorThingsAPI")
 		exit()
 
 	# Get and/or add Sensors

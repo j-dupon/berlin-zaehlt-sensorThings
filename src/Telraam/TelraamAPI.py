@@ -15,6 +15,7 @@ class TelraamAPI:
 		self.base_url = base_url
 		self.request_counter = 0
 		self.swap_key_counter = 0
+		self.telraam_fallback_data = None
 
 	def traffic_snapshot(self, settings):
 		url = f"{self.base_url}/reports/traffic_snapshot"
@@ -39,10 +40,10 @@ class TelraamAPI:
 		return self.telraam_post(f"{self.base_url}/reports/traffic", body)
 	
 	def swap_api_key(self, request_method, url, body):
-		LOGGER.log.info(f"TelraamAPI@swap_api_key: swapped X-Api-Key after {self.request_counter} requests")
+		LOGGER.log.info(f"TelraamAPI@q: swapped X-Api-Key after {self.request_counter} requests")
 		self.request_counter = 0
 		self.swap_key_counter += 1
-		self.api_key_header["X-Api-Key"] = self.api_keys[self.swap_api_key%3]
+		self.api_key_header["X-Api-Key"] = self.api_keys[self.swap_key_counter%3]
 
 		# Repeat a failed GET request
 		if request_method == "get":
@@ -60,7 +61,11 @@ class TelraamAPI:
 			res = requests.get(url, headers = self.api_key_header)
 			if res.status_code == 429 or res.json()["status_code"] == 429:
 				res = self.swap_api_key("get", url, None)
-			if res.json()["status_code"] > 200 or "errorMessage" in res.json():
+			if res.json()["status_code"] == 201 and "download_url" in res.json():
+				res = self.telraam_get(res.json()["download_url"])["result"]
+				LOGGER.debug.debug(f"TelraamAPI@telraam_get: fallback to download url - result: {res.json()}")
+				LOGGER.log.info(f"TelraamAPI@telraam_get: fallback to download url - status_code: {res.json()['status_code']}")
+			if res.json()["status_code"] > 201 or "errorMessage" in res.json():
 				LOGGER.err.error(f"TelraamAPI@telraam_get: request returned {res.json()['status_code']} - {res.json()}")
 				return {"ok": 0, "error_message": res.json()}
 			self.request_counter += 1
@@ -75,7 +80,11 @@ class TelraamAPI:
 			res = requests.post(url, data = json.dumps(body), headers = self.api_key_header)
 			if res.status_code == 429 or res.json()["status_code"] == 429:
 				res = self.swap_api_key("post", url, json.dumps(body))
-			if res.json()["status_code"] > 200 or "errorMessage" in res.json():
+			if res.json()["status_code"] == 201 and "download_url" in res.json():
+				res = self.telraam_get(res.json()["download_url"])["result"]
+				LOGGER.debug.debug(f"TelraamAPI@telraam_post: fallback to download url - result: {res.json()}")
+				LOGGER.log.info(f"TelraamAPI@telraam_post: fallback to download url - status_code: {res.json()['status_code']}")
+			if res.json()["status_code"] > 201 or "errorMessage" in res.json():
 				LOGGER.err.error(f"TelraamAPI@telraam_post: request returned {res.json()['status_code']} - {res.json()}")
 				return {"ok": 0, "error_message": res.json()}
 			self.request_counter += 1
