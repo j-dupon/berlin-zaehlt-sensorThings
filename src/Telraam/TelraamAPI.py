@@ -40,7 +40,7 @@ class TelraamAPI:
 		return self.telraam_post(f"{self.base_url}/reports/traffic", body)
 	
 	def swap_api_key(self, request_method, url, body):
-		LOGGER.log.info(f"TelraamAPI@q: swapped X-Api-Key after {self.request_counter} requests")
+		LOGGER.log.info(f"TelraamAPI@swap_api_key: swapped X-Api-Key after {self.request_counter} requests")
 		self.request_counter = 0
 		self.swap_key_counter += 1
 		self.api_key_header["X-Api-Key"] = self.api_keys[self.swap_key_counter%3]
