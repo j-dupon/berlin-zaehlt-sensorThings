@@ -21,7 +21,7 @@ def check_sensorThings_connection():
 if __name__ == "__main__":
 
 	if not check_sensorThings_connection():
-		LOGGER.err.error("ERROR: not connected to sensorThingsAPI")
+		LOGGER.err.error("not connected to sensorThingsAPI")
 		print("ERROR: not connected to sensorThingsAPI")
 		exit()
 

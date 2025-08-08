@@ -43,8 +43,14 @@ def telraam_cameras_from_api():
 	# Get a list of all Telraam instances
 	time.sleep(2)
 	telraam_instances = TELRAAM_API.instances()
-	if not telraam_instances['ok']:
-		return {"ok": False}  
+	if not telraam_instances['ok']: 
+		if TELRAAM_API.telraam_fallback_data != None:
+			LOGGER.err.warning(f"sync@telraam_cameras_from_api: starting next sync with fallback data")
+			telraam_instances = TELRAAM_API.telraam_fallback_data
+		else:
+			return {"ok": False} 
+	else: 
+		TELRAAM_API.telraam_fallback_data = telraam_instances
 
 	telraam_instances = telraam_instances['result'].json()['cameras']
 	telraam_instances_berlin = [instance for instance in telraam_instances if instance['segment_id'] in telraam_segments_berlin]
