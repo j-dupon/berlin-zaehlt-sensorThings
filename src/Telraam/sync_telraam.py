@@ -34,7 +34,7 @@ def telraam_cameras_from_api():
 	# Get a list of Telraam segments in Berlin
 	telraam_snapshots = TELRAAM_API.traffic_snapshot(CONFIG["telraam_traffic_snapshot"])
 	if not telraam_snapshots['ok']:
-		return {"ok": False}  
+		return telraam_snapshots
 
 	telraam_segments_berlin = {}
 	for snapshot in telraam_snapshots['result'].json()['features']:
@@ -43,20 +43,14 @@ def telraam_cameras_from_api():
 	# Get a list of all Telraam instances
 	time.sleep(2)
 	telraam_instances = TELRAAM_API.instances()
-	if not telraam_instances['ok']: 
-		if TELRAAM_API.telraam_fallback_data != None:
-			LOGGER.err.warning(f"sync@telraam_cameras_from_api: starting next sync with fallback data")
-			telraam_instances = TELRAAM_API.telraam_fallback_data
-		else:
-			return {"ok": False} 
-	else: 
-		TELRAAM_API.telraam_fallback_data = telraam_instances
+	if not telraam_instances['ok']:
+		return telraam_instances
 
 	telraam_instances = telraam_instances['result'].json()['cameras']
 	telraam_instances_berlin = [instance for instance in telraam_instances if instance['segment_id'] in telraam_segments_berlin]
 
 	return{
-		"ok": True,
+		"ok": 1,
 		"telraam_segments_berlin": telraam_segments_berlin,
 		"telraam_instances_berlin": telraam_instances_berlin
 	}
@@ -124,7 +118,7 @@ def sync(sensors, observed_properties, things, locations):
 	telraam_cameras = telraam_cameras_from_api()
 
 	if not telraam_cameras["ok"]:
-		LOGGER.log.info(f"sync -> skip this synchronization due to an error with the Telraam-API")
+		LOGGER.log.info(f"sync -> skip this synchronization due to an error with the Telraam-API - {telraam_cameras['error_message']}")
 		LOGGER.log.info("sync -> done \n")
 		return things, locations
 	

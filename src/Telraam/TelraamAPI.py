@@ -15,7 +15,8 @@ class TelraamAPI:
 		self.base_url = base_url
 		self.request_counter = 0
 		self.swap_key_counter = 0
-		self.telraam_fallback_data = None
+		self.traffic_snapshot_fallback_data = {"ok": 0, "error_message": "no data available"}
+		self.instances_fallback_data = {"ok": 0, "error_message": "no data available"}
 
 	def traffic_snapshot(self, settings):
 		url = f"{self.base_url}/reports/traffic_snapshot"
@@ -24,10 +25,25 @@ class TelraamAPI:
 			"contents": settings["contents"],
 			"area": settings["berlin_area"]
 		}	
-		return self.telraam_post(url, body)
+
+		res = self.telraam_post(url, body)
+		
+		if not res["ok"]:
+			LOGGER.log.info(f"TelraamAPI@traffic_snapshot: fallback to snpashot backup - {res["error_message"]}")
+			return self.traffic_snapshot_fallback_data
+
+		self.traffic_snapshot_fallback_data = res
+		return res
 
 	def instances(self):
-		return self.telraam_get(f"{self.base_url}/cameras")
+		res = self.telraam_get(f"{self.base_url}/cameras")
+
+		if not res["ok"]:
+			LOGGER.log.info(f"TelraamAPI@instances: fallback to instances backup - {res["error_message"]}")
+			return self.instances_fallback_data
+
+		self.instances_fallback_data = res
+		return res
 
 	def traffic(self, settings):
 		body = {
@@ -37,10 +53,11 @@ class TelraamAPI:
 		  "time_start": settings["time_start"],
 		  "time_end": settings["time_end"]
 		}	
+
 		return self.telraam_post(f"{self.base_url}/reports/traffic", body)
-	
+		
 	def swap_api_key(self, request_method, url, body):
-		LOGGER.log.info(f"TelraamAPI@swap_api_key: swapped X-Api-Key after {self.request_counter} requests")
+		LOGGER.log.info(f"TelraamAPI@swap_api_key({self.api_keys[self.swap_key_counter%3]}): swapping X-Api-Key after {self.request_counter} requests")
 		self.request_counter = 0
 		self.swap_key_counter += 1
 		self.api_key_header["X-Api-Key"] = self.api_keys[self.swap_key_counter%3]
@@ -59,8 +76,11 @@ class TelraamAPI:
 	def telraam_get(self, url):
 		try:
 			res = requests.get(url, headers = self.api_key_header)
-			if res.status_code == 429 or res.json()["status_code"] == 429:
+			if res.status_code == 429:
 				res = self.swap_api_key("get", url, None)
+			if res.status_code > 201:
+				LOGGER.err.error(f"TelraamAPI@telraam_get: request returned {res.status_code} - {res.json()}")
+				return {"ok": 0, "error_message": res.json()}
 			if res.json()["status_code"] == 201 and "download_url" in res.json():
 				res = self.telraam_get(res.json()["download_url"])["result"]
 				LOGGER.debug.debug(f"TelraamAPI@telraam_get: fallback to download url - result: {res.json()}")
@@ -78,8 +98,11 @@ class TelraamAPI:
 	def telraam_post(self, url, body):
 		try:
 			res = requests.post(url, data = json.dumps(body), headers = self.api_key_header)
-			if res.status_code == 429 or res.json()["status_code"] == 429:
+			if res.status_code == 429:
 				res = self.swap_api_key("post", url, json.dumps(body))
+			if res.status_code > 201:
+				LOGGER.err.error(f"TelraamAPI@telraam_post: request returned {res.status_code} - {res.json()}")
+				return {"ok": 0, "error_message": res.json()}
 			if res.json()["status_code"] == 201 and "download_url" in res.json():
 				res = self.telraam_get(res.json()["download_url"])["result"]
 				LOGGER.debug.debug(f"TelraamAPI@telraam_post: fallback to download url - result: {res.json()}")
